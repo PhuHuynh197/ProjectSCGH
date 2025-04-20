@@ -23,6 +23,9 @@ jobs:
 
       - name: Run Trivy on source code
         run: trivy fs --exit-code 1 --severity HIGH,CRITICAL .
-      
-      - name: Run Trivy on container image
-        run: trivy image --exit-code 1 --severity HIGH,CRITICAL your-docker-image
+
+      - name: Build Docker image
+        run: docker build -t phu-image-ci ./HuynhMinhPhu_398
+
+      - name: Run Trivy on Docker image
+        run: trivy image --exit-code 1 --severity HIGH,CRITICAL phu-image-ci
