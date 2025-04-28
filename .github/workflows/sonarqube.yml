@@ -45,4 +45,5 @@ jobs:
             -Dsonar.projectKey=PhuHuynh197_ProjectSCGH \
             -Dsonar.organization=PhuHuynh197 \
             -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.login=$SONAR_TOKEN
+            -Dsonar.login=$SONAR_TOKEN \
+            -Dsonar.sources=.
