@@ -41,8 +41,10 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: "https://sonarcloud.io"
         run: |
+          cd ProjectSecure
           mvn clean verify sonar:sonar \
             -Dsonar.projectKey=PhuHuynh197_ProjectSCGH \
             -Dsonar.organization=PhuHuynh197 \
             -Dsonar.host.url=$SONAR_HOST_URL \
             -Dsonar.login=$SONAR_TOKEN
+
