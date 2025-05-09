@@ -1,4 +1,4 @@
-# Dockerfile dùng để test Trivy scan (có CVE thật)
+# Dockerfile dùng để test Trivy scan 
 FROM alpine:3.12
 
 # Cài thử một package dễ có lỗ hổng
