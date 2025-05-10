@@ -1,4 +1,6 @@
-FROM eclipse-temurin:17-jdk-alpine
-COPY target/*.jar /app/app.jar
-WORKDIR /app
-CMD ["java", "-jar", "app.jar"]
+# Dockerfile dùng để test Trivy scan sạch
+FROM alpine:3.18
+
+RUN apk add --no-cache curl
+
+CMD ["sh"]
