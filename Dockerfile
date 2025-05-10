@@ -1,6 +1,12 @@
-# Dockerfile dùng để test Trivy scan sạch
+# Dùng Alpine mới đã được vá lỗi bảo mật
 FROM alpine:3.18
 
-RUN apk add --no-cache curl
+# Cài curl và zlib (nếu cần)
+RUN apk add --no-cache curl zlib
 
+# Copy app nếu có (tùy vào project của m)
+WORKDIR /app
+COPY . .
+
+# Default command – chỉ cần có để image không crash
 CMD ["sh"]
