@@ -33,7 +33,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Run SonarCloud Analysis
-        run: mvn clean verify sonar:sonar -Dsonar.projectKey=ProjectSCGH -Dsonar.organization=phuhuynh197 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        run: mvn clean verify sonar:sonar \
+                  -Dsonar.projectKey=PhuHuynh197_ProjectSCGH \
+                  -Dsonar.organization=phuhuynh197 \
+                  -Dsonar.host.url=https://sonarcloud.io \
+                  -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
 
   snyk-scan:
     runs-on: ubuntu-latest
