@@ -51,10 +51,15 @@ jobs:
 
       - name: Count vulnerabilities from Snyk report
         run: |
-          sudo apt-get install jq -y
+          if [ ! -f snyk.sarif ]; then
+            echo "❌ snyk.sarif not found – Snyk scan likely failed or not generated output."
+            exit 1
+          fi
+      
           RESULTS_LENGTH=$(jq '.runs[0].results | length' snyk.sarif)
           echo "RESULTS_LENGTH=$RESULTS_LENGTH" >> $GITHUB_ENV
-          echo "Found $RESULTS_LENGTH vulnerabilities."
+          echo "✅ Found $RESULTS_LENGTH vulnerabilities."
+
 
       - name: Fail job if vulnerabilities exist
         run: |
