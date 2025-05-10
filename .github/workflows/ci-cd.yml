@@ -39,38 +39,31 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: Set up Snyk
+        uses: snyk/actions/maven@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: code test
+          args: --sarif-file-output=snyk.sarif
 
-    - name: Snyk Scan (Maven)
-      uses: snyk/actions/maven@master
-      continue-on-error: true
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        command: test
-        args: --all-projects --sarif-file-output=snyk.sarif
+      - name: Count vulnerabilities from Snyk report
+        run: |
+          sudo apt-get install jq -y
+          RESULTS_LENGTH=$(jq '.runs[0].results | length' snyk.sarif)
+          echo "RESULTS_LENGTH=$RESULTS_LENGTH" >> $GITHUB_ENV
+          echo "Found $RESULTS_LENGTH vulnerabilities."
 
-    - name: Count vulnerabilities from Snyk report
-      run: |
-        if [ ! -f snyk.sarif ]; then
-          echo "❌ snyk.sarif not found – Snyk scan likely failed or not generated output."
-          exit 1
-        fi
-        RESULTS_LENGTH=$(jq '.runs[0].results | length' snyk.sarif)
-        echo "RESULTS_LENGTH=$RESULTS_LENGTH" >> $GITHUB_ENV
-        echo "✅ Found $RESULTS_LENGTH vulnerabilities."
-
-    - name: Fail job if vulnerabilities exist
-      run: |
-        if [ "$RESULTS_LENGTH" != "0" ]; then
-          echo "❌ Found $RESULTS_LENGTH vulnerabilities!"
-          exit 1
-        else
-          echo "✅ No vulnerabilities found."
-        fi
-      env:
-        RESULTS_LENGTH: ${{ env.RESULTS_LENGTH }}
-
+      - name: Fail job if vulnerabilities exist
+        run: |
+          if [ "$RESULTS_LENGTH" != 0 ]; then
+            echo "❌ Found $RESULTS_LENGTH vulnerabilities!"
+            exit 1
+          else
+            echo "✅ No vulnerabilities found."
+          fi
 
   trivy-scan:
     runs-on: ubuntu-latest
