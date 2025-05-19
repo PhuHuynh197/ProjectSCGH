@@ -96,3 +96,9 @@ jobs:
         with:
           name: security-report
           path: security-report.md
+          
+      - name: Generate Markdown Report
+        run: |
+          chmod +x generate-security-report.sh
+          ./generate-security-report.sh
+
