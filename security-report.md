@@ -1,171 +1,31 @@
-# 🛡️ Security Vulnerability Report (Generated: Mon May 19 22:34:00 UTC 2025)
+# 🛡️ Security Vulnerability Report (Generated: Mon May 19 22:46:15 UTC 2025)
 
 
 ## 🔍 Trivy Scan Report from `trivy-fs.json`
-- **CVE**: CVE-2024-12798  
-  - **Package**: ch.qos.logback:logback-core  
-  - **Version**: 1.5.7  
-  - **Severity**: MEDIUM  
-  - **CVSS**: N/A  
-  - **CIA Impact**: None / None / None  
-  - **OWASP ASVS**: V5.3 - Logging and Encoding  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2024-12798](https://avd.aquasec.com/nvd/cve-2024-12798)  
-
-- **CVE**: CVE-2024-12801  
-  - **Package**: ch.qos.logback:logback-core  
-  - **Version**: 1.5.7  
-  - **Severity**: LOW  
-  - **CVSS**: N/A  
-  - **CIA Impact**: None / None / None  
-  - **OWASP ASVS**: V0 - Unclassified  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2024-12801](https://avd.aquasec.com/nvd/cve-2024-12801)  
-
-- **CVE**: CVE-2023-22102  
-  - **Package**: mysql:mysql-connector-java  
-  - **Version**: 8.0.33  
-  - **Severity**: HIGH  
-  - **CVSS**: N/A  
-  - **CIA Impact**: None / None / None  
-  - **OWASP ASVS**: V5.1 - Input Validation  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2023-22102](https://avd.aquasec.com/nvd/cve-2023-22102)  
-
-- **CVE**: CVE-2025-24813  
-  - **Package**: org.apache.tomcat.embed:tomcat-embed-core  
-  - **Version**: 10.1.28  
-  - **Severity**: CRITICAL  
-  - **CVSS**: 9.8  
-  - **CIA Impact**: High / High / High  
-  - **OWASP ASVS**: V1.4 - Secure Deployment  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2025-24813](https://avd.aquasec.com/nvd/cve-2025-24813)  
-
-- **CVE**: CVE-2024-50379  
-  - **Package**: org.apache.tomcat.embed:tomcat-embed-core  
-  - **Version**: 10.1.28  
-  - **Severity**: HIGH  
-  - **CVSS**: N/A  
-  - **CIA Impact**: None / None / None  
-  - **OWASP ASVS**: V0 - Unclassified  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2024-50379](https://avd.aquasec.com/nvd/cve-2024-50379)  
-
-- **CVE**: CVE-2024-56337  
-  - **Package**: org.apache.tomcat.embed:tomcat-embed-core  
-  - **Version**: 10.1.28  
-  - **Severity**: HIGH  
-  - **CVSS**: N/A  
-  - **CIA Impact**: None / None / None  
-  - **OWASP ASVS**: V0 - Unclassified  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2024-56337](https://avd.aquasec.com/nvd/cve-2024-56337)  
-
-- **CVE**: CVE-2024-52317  
-  - **Package**: org.apache.tomcat.embed:tomcat-embed-core  
-  - **Version**: 10.1.28  
-  - **Severity**: MEDIUM  
-  - **CVSS**: N/A  
-  - **CIA Impact**: None / None / None  
-  - **OWASP ASVS**: V0 - Unclassified  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2024-52317](https://avd.aquasec.com/nvd/cve-2024-52317)  
-
-- **CVE**: CVE-2025-31650  
-  - **Package**: org.apache.tomcat.embed:tomcat-embed-core  
-  - **Version**: 10.1.28  
-  - **Severity**: MEDIUM  
-  - **CVSS**: 7.5  
-  - **CIA Impact**: Medium / Medium / Medium  
-  - **OWASP ASVS**: V0 - Unclassified  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2025-31650](https://avd.aquasec.com/nvd/cve-2025-31650)  
-
-- **CVE**: CVE-2025-31651  
-  - **Package**: org.apache.tomcat.embed:tomcat-embed-core  
-  - **Version**: 10.1.28  
-  - **Severity**: LOW  
-  - **CVSS**: 9.8  
-  - **CIA Impact**: High / High / High  
-  - **OWASP ASVS**: V0 - Unclassified  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2025-31651](https://avd.aquasec.com/nvd/cve-2025-31651)  
-
-- **CVE**: CVE-2022-4244  
-  - **Package**: org.codehaus.plexus:plexus-utils  
-  - **Version**: 3.0.22  
-  - **Severity**: HIGH  
-  - **CVSS**: 7.5  
-  - **CIA Impact**: Medium / Medium / Medium  
-  - **OWASP ASVS**: V5.2 - Data Protection  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2022-4244](https://avd.aquasec.com/nvd/cve-2022-4244)  
-
-- **CVE**: CVE-2022-4245  
-  - **Package**: org.codehaus.plexus:plexus-utils  
-  - **Version**: 3.0.22  
-  - **Severity**: MEDIUM  
-  - **CVSS**: 4.3  
-  - **CIA Impact**: Low / Low / Low  
-  - **OWASP ASVS**: V0 - Unclassified  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2022-4245](https://avd.aquasec.com/nvd/cve-2022-4245)  
-
-- **CVE**: CVE-2025-22235  
-  - **Package**: org.springframework.boot:spring-boot  
-  - **Version**: 3.3.3  
-  - **Severity**: HIGH  
-  - **CVSS**: N/A  
-  - **CIA Impact**: None / None / None  
-  - **OWASP ASVS**: V0 - Unclassified  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2025-22235](https://avd.aquasec.com/nvd/cve-2025-22235)  
-
-- **CVE**: CVE-2024-38827  
-  - **Package**: org.springframework.security:spring-security-core  
-  - **Version**: 6.3.3  
-  - **Severity**: MEDIUM  
-  - **CVSS**: N/A  
-  - **CIA Impact**: None / None / None  
-  - **OWASP ASVS**: V0 - Unclassified  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2024-38827](https://avd.aquasec.com/nvd/cve-2024-38827)  
-
-- **CVE**: CVE-2025-22228  
-  - **Package**: org.springframework.security:spring-security-crypto  
-  - **Version**: 6.3.3  
-  - **Severity**: HIGH  
-  - **CVSS**: N/A  
-  - **CIA Impact**: None / None / None  
-  - **OWASP ASVS**: V3.2 - Credential Storage  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2025-22228](https://avd.aquasec.com/nvd/cve-2025-22228)  
-
-- **CVE**: CVE-2024-38821  
-  - **Package**: org.springframework.security:spring-security-web  
-  - **Version**: 6.3.3  
-  - **Severity**: CRITICAL  
-  - **CVSS**: N/A  
-  - **CIA Impact**: None / None / None  
-  - **OWASP ASVS**: V2.1 - Authentication  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2024-38821](https://avd.aquasec.com/nvd/cve-2024-38821)  
-
-- **CVE**: CVE-2024-38820  
-  - **Package**: org.springframework:spring-context  
-  - **Version**: 6.1.12  
-  - **Severity**: MEDIUM  
-  - **CVSS**: 5.3  
-  - **CIA Impact**: Low / Low / Low  
-  - **OWASP ASVS**: V0 - Unclassified  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2024-38820](https://avd.aquasec.com/nvd/cve-2024-38820)  
-
-- **CVE**: CVE-2024-38816  
-  - **Package**: org.springframework:spring-webmvc  
-  - **Version**: 6.1.12  
-  - **Severity**: HIGH  
-  - **CVSS**: N/A  
-  - **CIA Impact**: None / None / None  
-  - **OWASP ASVS**: V0 - Unclassified  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2024-38816](https://avd.aquasec.com/nvd/cve-2024-38816)  
-
-- **CVE**: CVE-2024-38819  
-  - **Package**: org.springframework:spring-webmvc  
-  - **Version**: 6.1.12  
-  - **Severity**: HIGH  
-  - **CVSS**: N/A  
-  - **CIA Impact**: None / None / None  
-  - **OWASP ASVS**: V0 - Unclassified  
-  - **Reference**: [https://avd.aquasec.com/nvd/cve-2024-38819](https://avd.aquasec.com/nvd/cve-2024-38819)  
-
+| CVE | Package | Version | Severity | CVSS | CIA | ASVS | Link |
+|-----|---------|---------|----------|------|-----|------|------|
+| CVE-2024-12798 | ch.qos.logback:logback-core | 1.5.7 | MEDIUM | N/A | None / None / None | V5.3 - Logging and Encoding | [link](https://avd.aquasec.com/nvd/cve-2024-12798) |
+| CVE-2024-12801 | ch.qos.logback:logback-core | 1.5.7 | LOW | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2024-12801) |
+| CVE-2023-22102 | mysql:mysql-connector-java | 8.0.33 | HIGH | N/A | None / None / None | V5.1 - Input Validation | [link](https://avd.aquasec.com/nvd/cve-2023-22102) |
+| CVE-2025-24813 | org.apache.tomcat.embed:tomcat-embed-core | 10.1.28 | CRITICAL | 9.8 | High / High / High | V1.4 - Secure Deployment | [link](https://avd.aquasec.com/nvd/cve-2025-24813) |
+| CVE-2024-50379 | org.apache.tomcat.embed:tomcat-embed-core | 10.1.28 | HIGH | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2024-50379) |
+| CVE-2024-56337 | org.apache.tomcat.embed:tomcat-embed-core | 10.1.28 | HIGH | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2024-56337) |
+| CVE-2024-52317 | org.apache.tomcat.embed:tomcat-embed-core | 10.1.28 | MEDIUM | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2024-52317) |
+| CVE-2025-31650 | org.apache.tomcat.embed:tomcat-embed-core | 10.1.28 | MEDIUM | 7.5 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2025-31650) |
+| CVE-2025-31651 | org.apache.tomcat.embed:tomcat-embed-core | 10.1.28 | LOW | 9.8 | High / High / High | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2025-31651) |
+| CVE-2022-4244 | org.codehaus.plexus:plexus-utils | 3.0.22 | HIGH | 7.5 | Medium / Medium / Medium | V5.2 - Data Protection | [link](https://avd.aquasec.com/nvd/cve-2022-4244) |
+| CVE-2022-4245 | org.codehaus.plexus:plexus-utils | 3.0.22 | MEDIUM | 4.3 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2022-4245) |
+| CVE-2025-22235 | org.springframework.boot:spring-boot | 3.3.3 | HIGH | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2025-22235) |
+| CVE-2024-38827 | org.springframework.security:spring-security-core | 6.3.3 | MEDIUM | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2024-38827) |
+| CVE-2025-22228 | org.springframework.security:spring-security-crypto | 6.3.3 | HIGH | N/A | None / None / None | V3.2 - Credential Storage | [link](https://avd.aquasec.com/nvd/cve-2025-22228) |
+| CVE-2024-38821 | org.springframework.security:spring-security-web | 6.3.3 | CRITICAL | N/A | None / None / None | V2.1 - Authentication | [link](https://avd.aquasec.com/nvd/cve-2024-38821) |
+| CVE-2024-38820 | org.springframework:spring-context | 6.1.12 | MEDIUM | 5.3 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2024-38820) |
+| CVE-2024-38816 | org.springframework:spring-webmvc | 6.1.12 | HIGH | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2024-38816) |
+| CVE-2024-38819 | org.springframework:spring-webmvc | 6.1.12 | HIGH | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2024-38819) |
 
 ## 🔍 Trivy Scan Report from `trivy-image.json`
+| CVE | Package | Version | Severity | CVSS | CIA | ASVS | Link |
+|-----|---------|---------|----------|------|-----|------|------|
 
 ## 📊 SonarCloud Summary
 * bugs: 0
