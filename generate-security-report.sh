@@ -1,7 +1,7 @@
 #!/bin/bash
 
 OUTPUT_FILE="security-report.md"
-echo "# Security Vulnerability Report (Generated: $(date -u))" > $OUTPUT_FILE
+echo "# 🛡️ Security Vulnerability Report (Generated: $(date -u))" > $OUTPUT_FILE
 echo "" >> $OUTPUT_FILE
 
 # --- CVSS to CIA Impact Mapping ---
