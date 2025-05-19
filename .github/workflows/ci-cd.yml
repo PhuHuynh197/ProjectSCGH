@@ -102,8 +102,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          git config --global user.name "Phu Huynh"
-          git config --global user.email "phuhuynh@example.com"
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
           git checkout main
           git pull origin main
           git add security-report.md
