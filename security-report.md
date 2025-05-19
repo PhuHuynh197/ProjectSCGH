@@ -1,7 +1,7 @@
-# 🛡️ Security Vulnerability Report (Generated: Mon May 19 21:48:35 UTC 2025)
+# 🛡️ Security Vulnerability Report (Generated: Mon May 19 22:22:32 UTC 2025)
 
 
-## Trivy Scan Report from `trivy-fs.json`
+## 🔍 Trivy Scan Report from `trivy-fs.json`
 - **CVE**: CVE-2024-12798  
   - **Package**: ch.qos.logback:logback-core  
   - **Version**: 1.5.7  
@@ -165,9 +165,6 @@
   - **Reference**: [https://avd.aquasec.com/nvd/cve-2024-38819](https://avd.aquasec.com/nvd/cve-2024-38819)  
 
 
-## Trivy Scan Report from `trivy-image.json`
+## 🔍 Trivy Scan Report from `trivy-image.json`
 
-## SonarCloud Summary
-* bugs: 0
-* vulnerabilities: 0
-* security_hotspots: 1
+⚠️ Skipped SonarCloud summary (missing SONAR_TOKEN env)
