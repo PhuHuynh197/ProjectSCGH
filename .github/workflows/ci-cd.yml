@@ -35,8 +35,6 @@ jobs:
       - name: Run SonarCloud Analysis
         run: mvn clean verify sonar:sonar -Dsonar.projectKey=PhuHuynh197_ProjectSCGH -Dsonar.organization=phuhuynh197 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-
-
   snyk-scan:
     runs-on: ubuntu-latest
     needs: build
@@ -49,7 +47,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: code test
-          args: --all-projects --json-file-output=snyk.json
+          args: --all-projects --sarif-file-output=snyk.sarif
 
       - name: Count vulnerabilities from Snyk report
         run: |
@@ -72,6 +70,7 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v4
+
       - name: Install Trivy
         run: |
           sudo apt-get install -y wget apt-transport-https gnupg lsb-release
@@ -88,25 +87,25 @@ jobs:
       - name: Trivy Image Scan
         run: trivy image projectscgh:latest --format json -o trivy-image.json
 
-      - name: Generate Security Report
-        run: bash generate-security-report.sh
+      - name: Generate Markdown Report
+        run: |
+          chmod +x generate-security-report.sh
+          ./generate-security-report.sh
 
       - name: Upload Security Report Artifact
         uses: actions/upload-artifact@v4
         with:
           name: security-report
           path: security-report.md
-          
-      - name: Generate Markdown Report
-        run: |
-          chmod +x generate-security-report.sh
-          ./generate-security-report.sh
+
       - name: Commit security report to repo
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.name "Phu Huynh"
+          git config --global user.email "phuhuynh@example.com"
+          git checkout main
+          git pull origin main
           git add security-report.md
-          git commit -m "Add security scan report"
-          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/PhuHuynh197/ProjectSCGH.git
-
-
+          git commit -m "🛡️ Add latest security scan report"
+          git push https://x-access-token:$GH_TOKEN@github.com/PhuHuynh197/ProjectSCGH.git main
