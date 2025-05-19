@@ -1,4 +1,4 @@
-# 🛡️ Security Vulnerability Report (Generated: Mon May 19 22:27:53 UTC 2025)
+# 🛡️ Security Vulnerability Report (Generated: Mon May 19 22:34:00 UTC 2025)
 
 
 ## 🔍 Trivy Scan Report from `trivy-fs.json`
@@ -167,4 +167,7 @@
 
 ## 🔍 Trivy Scan Report from `trivy-image.json`
 
-⚠️ Skipped SonarCloud summary (missing SONAR_TOKEN env)
+## 📊 SonarCloud Summary
+* bugs: 0
+* vulnerabilities: 0
+* security_hotspots: 1
