@@ -35,7 +35,7 @@ asvs_mapping() {
 # --- Trivy JSON Scanner ---
 extract_trivy_json() {
   local FILE=$1
-  echo -e "\n## 🔍 Trivy Scan Report from \`$FILE\`" >> $OUTPUT_FILE
+  echo -e "\n## Trivy Scan Report from \`$FILE\`" >> $OUTPUT_FILE
   jq -c '.Results[] | select(.Vulnerabilities != null) | .Target as $target | .Vulnerabilities[]?' "$FILE" | while read -r vuln; do
     cve=$(echo "$vuln" | jq -r '.VulnerabilityID')
     pkg=$(echo "$vuln" | jq -r '.PkgName')
@@ -61,7 +61,7 @@ extract_trivy_json() {
 # --- Snyk SARIF Parser ---
 extract_snyk_sarif() {
   local FILE=$1
-  echo -e "\n## 🧪 Snyk Scan Report from \`$FILE\`" >> $OUTPUT_FILE
+  echo -e "\n## Snyk Scan Report from \`$FILE\`" >> $OUTPUT_FILE
   jq -c '.runs[0].results[]?' "$FILE" | while read -r result; do
     ruleId=$(echo "$result" | jq -r '.ruleId')
     message=$(echo "$result" | jq -r '.message.text')
@@ -83,7 +83,7 @@ extract_sonar_summary() {
     return
   fi
 
-  echo -e "\n## 📊 SonarCloud Summary" >> $OUTPUT_FILE
+  echo -e "\n## SonarCloud Summary" >> $OUTPUT_FILE
   curl -s -u "$SONAR_TOKEN": \
     "https://sonarcloud.io/api/measures/component?component=PhuHuynh197_ProjectSCGH&metricKeys=bugs,vulnerabilities,security_hotspots" \
     | jq -r '.component.measures[] | "* \(.metric): \(.value)"' >> $OUTPUT_FILE
