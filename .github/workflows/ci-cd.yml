@@ -40,13 +40,15 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Snyk CLI and scan
-        run: |
-          curl -Lo snyk https://github.com/snyk/snyk/releases/latest/download/snyk-linux
-          chmod +x snyk
-          ./snyk test --all-projects --sarif-file-output=snyk.sarif || true
+      - name: Set up Snyk
+        uses: snyk/actions/maven@master
+        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: code test
+          args: --all-projects --sarif-file-output=snyk.sarif
+
       - name: Count vulnerabilities from Snyk report
         run: |
           sudo apt-get install jq -y
