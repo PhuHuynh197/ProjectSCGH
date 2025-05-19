@@ -112,8 +112,21 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
+          
+          # Reset branch về đúng origin/main để tránh xung đột
           git fetch origin main
+          git checkout main
           git reset --hard origin/main
-          git add security-report.md generate-security-report.sh
-          git commit -m "🛡️ Add latest security scan report"
-          git push https://x-access-token:$GH_TOKEN@github.com/PhuHuynh197/ProjectSCGH.git main
+          
+          # Track file nếu là file mới chưa được theo dõi
+          git add -f security-report.md
+          git add -f generate-security-report.sh
+
+          # Kiểm tra nếu có thay đổi thì mới commit + push
+          if ! git diff --cached --quiet; then
+            git commit -m "🛡️ Add latest security scan report"
+            git push https://x-access-token:$GH_TOKEN@github.com/PhuHuynh197/ProjectSCGH.git main
+          else
+            echo "✅ No changes to commit"
+          fi
+
