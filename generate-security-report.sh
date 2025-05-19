@@ -32,10 +32,13 @@ asvs_mapping() {
   esac
 }
 
-# --- Trivy JSON Scanner ---
+# --- Trivy JSON Scanner (Table Format) ---
 extract_trivy_json() {
   local FILE=$1
   echo -e "\n## 🔍 Trivy Scan Report from \`$FILE\`" >> $OUTPUT_FILE
+  echo '| CVE | Package | Version | Severity | CVSS | CIA | ASVS | Link |' >> $OUTPUT_FILE
+  echo '|-----|---------|---------|----------|------|-----|------|------|' >> $OUTPUT_FILE
+
   jq -c '.Results[] | select(.Vulnerabilities != null) | .Target as $target | .Vulnerabilities[]?' "$FILE" | while read -r vuln; do
     cve=$(echo "$vuln" | jq -r '.VulnerabilityID')
     pkg=$(echo "$vuln" | jq -r '.PkgName')
@@ -46,15 +49,8 @@ extract_trivy_json() {
     cvss=${cvss:-"N/A"}
     cia=$(cvss_impact "$cvss")
     asvs=$(asvs_mapping "$cve")
-    echo "- **CVE**: $cve  
-  - **Package**: $pkg  
-  - **Version**: $version  
-  - **Severity**: $severity  
-  - **CVSS**: $cvss  
-  - **CIA Impact**: $cia  
-  - **OWASP ASVS**: $asvs  
-  - **Reference**: [$link]($link)  
-" >> $OUTPUT_FILE
+
+    echo "| $cve | $pkg | $version | $severity | $cvss | $cia | $asvs | [link]($link) |" >> $OUTPUT_FILE
   done
 }
 
