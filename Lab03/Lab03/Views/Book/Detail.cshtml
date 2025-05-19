@@ -1,0 +1,41 @@
+﻿@model Lab03.Models.Book
+
+@{
+    ViewData["Title"] = "Chi tiết sách";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mb-4">📖 Chi tiết sách</h2>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="row g-0">
+                <div class="col-md-4 p-3 text-center">
+                    @if (!string.IsNullOrEmpty(Model.Cover))
+                    {
+                        <img src="@Url.Content("~/" + Model.Cover)" alt="Ảnh sách" class="img-fluid rounded shadow-sm" />
+                    }
+                    else
+                    {
+                        <span class="text-muted fst-italic">Không có ảnh</span>
+                    }
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title">@Model.Title</h5>
+                        <p class="card-text"><strong>Tác giả:</strong> @Model.Author</p>
+                        <p class="card-text"><strong>Năm xuất bản:</strong> @Model.PublishYear</p>
+                        <p class="card-text"><strong>Giá:</strong> @($"{Model.Price:#,##0} ₫")</p>
+                        <p class="card-text"><strong>Thể loại:</strong> @Model.Category?.Name</p>
+
+                        <div class="mt-4">
+                            <a class="btn btn-primary" asp-action="Update" asp-route-id="@Model.ID">✏️ Sửa</a>
+                            <a class="btn btn-secondary" asp-action="Index">⬅️ Trở về danh sách</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
