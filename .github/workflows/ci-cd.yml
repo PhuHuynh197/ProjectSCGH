@@ -49,7 +49,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: code test
-          args: --all-projects --sarif-file-output=snyk.sarif
+          args: --all-projects --json-file-output=snyk.json
 
       - name: Count vulnerabilities from Snyk report
         run: |
@@ -80,10 +80,19 @@ jobs:
           sudo apt-get update -y && sudo apt-get install -y trivy
 
       - name: Trivy FileSystem Scan
-        run: trivy fs . --format table
+        run: trivy fs . --format json -o trivy-fs.json
 
       - name: Build Docker image (for Trivy image scan)
         run: docker build -t projectscgh:latest .
 
       - name: Trivy Image Scan
-        run: trivy image projectscgh:latest --format table
+        run: trivy image projectscgh:latest --format json -o trivy-image.json
+
+      - name: Generate Security Report
+        run: bash generate-security-report.sh
+
+      - name: Upload Security Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: security-report.md
