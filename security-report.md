@@ -1,4 +1,4 @@
-# 🛡️ Security Vulnerability Report (Generated: Tue May 20 17:49:07 UTC 2025)
+# 🛡️ Security Vulnerability Report (Generated: Tue May 20 18:40:23 UTC 2025)
 
 
 ## 🔍 Trivy Scan Report from `trivy-fs.json`
@@ -217,7 +217,4 @@
 | CVE-2022-0563 | util-linux | 2.36.1-8+deb11u2 | LOW | 5.5 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2022-0563) |
 | CVE-2023-45853 | zlib1g | 1:1.2.11.dfsg-2+deb11u2 | CRITICAL | 9.8 | High / High / High | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-45853) |
 
-## 📊 SonarCloud Summary
-* bugs: 1
-* vulnerabilities: 0
-* security_hotspots: 2
+⚠️ Skipped SonarCloud summary (missing SONAR_TOKEN env)
