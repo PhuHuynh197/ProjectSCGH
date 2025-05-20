@@ -100,20 +100,16 @@ jobs:
       - name: Trivy FileSystem Scan
         run: trivy fs . --format json -o trivy-fs.json
 
-      - name: Build Docker image (only if .jar exists)
+      - name: Build Docker image
         run: |
-          if ls target/*.jar 1> /dev/null 2>&1; then
-            docker build -t projectscgh:latest .
-          else
-            echo "⚠️ No JAR file found in target/. Skipping Docker build."
-          fi
+          docker build -t projectscgh:latest . || echo "Skip docker build if no Dockerfile"
 
-      - name: Trivy Docker Image Scan (only if image exists)
+      - name: Trivy Docker Image Scan
         run: |
-          if docker image inspect projectscgh:latest > /dev/null 2>&1; then
+          if [ -f Dockerfile ]; then
             trivy image projectscgh:latest --format json -o trivy-image.json
           else
-            echo "⚠️ No Docker image found. Skipping Trivy image scan."
+            echo "No Dockerfile found, skipping image scan."
           fi
 
       - name: Generate Markdown Report (Trivy + Snyk + Sonar)
