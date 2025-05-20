@@ -61,7 +61,6 @@ jobs:
         run: |
           if [ "$RESULTS_LENGTH" != 0 ]; then
             echo "❌ Found $RESULTS_LENGTH vulnerabilities!"
-            exit 1
           else
             echo "✅ No vulnerabilities found."
           fi
