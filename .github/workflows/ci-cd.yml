@@ -112,7 +112,9 @@ jobs:
             echo "No Dockerfile found, skipping image scan."
           fi
 
-      - name: Generate Security Report
+      - name: Generate Markdown Report (Trivy + Snyk + Sonar)
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           chmod +x generate-security-report.sh
           ./generate-security-report.sh
