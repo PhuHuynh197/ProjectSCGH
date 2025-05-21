@@ -70,7 +70,7 @@
 		<dependency>
   <groupId>com.fasterxml.jackson.core</groupId>
   <artifactId>jackson-databind</artifactId>
-  <version>2.9.9</version> <!-- Có nhiều CVE -->
+  <version>2.19.0</version> <!-- Có nhiều CVE -->
 </dependency>
 
 		<dependency>
