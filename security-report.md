@@ -1,4 +1,4 @@
-# 🛡️ Security Vulnerability Report (Generated: Tue May 20 20:26:27 UTC 2025)
+# 🛡️ Security Vulnerability Report (Generated: Sat May 24 04:08:46 UTC 2025)
 
 
 ## 🔍 Trivy Scan Report from `trivy-fs.json`
@@ -101,28 +101,26 @@
 | CVE-2025-30258 | gpgv | 2.2.27-2+deb11u2 | LOW | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2025-30258) |
 | CVE-2011-3374 | libapt-pkg6.0 | 2.2.4 | LOW | 3.7 | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2011-3374) |
 | CVE-2022-0563 | libblkid1 | 2.36.1-8+deb11u2 | LOW | 5.5 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2022-0563) |
-| CVE-2023-4806 | libc-bin | 2.31-13+deb11u11 | MEDIUM | 5.9 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-4806) |
-| CVE-2023-4813 | libc-bin | 2.31-13+deb11u11 | MEDIUM | 5.9 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-4813) |
-| CVE-2025-0395 | libc-bin | 2.31-13+deb11u11 | MEDIUM | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2025-0395) |
-| CVE-2010-4756 | libc-bin | 2.31-13+deb11u11 | LOW | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2010-4756) |
-| CVE-2018-20796 | libc-bin | 2.31-13+deb11u11 | LOW | 7.5 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2018-20796) |
-| CVE-2019-1010022 | libc-bin | 2.31-13+deb11u11 | LOW | 9.8 | High / High / High | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010022) |
-| CVE-2019-1010023 | libc-bin | 2.31-13+deb11u11 | LOW | 8.8 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010023) |
-| CVE-2019-1010024 | libc-bin | 2.31-13+deb11u11 | LOW | 5.3 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010024) |
-| CVE-2019-1010025 | libc-bin | 2.31-13+deb11u11 | LOW | 5.3 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010025) |
-| CVE-2019-9192 | libc-bin | 2.31-13+deb11u11 | LOW | 7.5 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-9192) |
-| CVE-2025-4802 | libc-bin | 2.31-13+deb11u11 | UNKNOWN | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2025-4802) |
-| CVE-2023-4806 | libc6 | 2.31-13+deb11u11 | MEDIUM | 5.9 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-4806) |
-| CVE-2023-4813 | libc6 | 2.31-13+deb11u11 | MEDIUM | 5.9 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-4813) |
-| CVE-2025-0395 | libc6 | 2.31-13+deb11u11 | MEDIUM | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2025-0395) |
-| CVE-2010-4756 | libc6 | 2.31-13+deb11u11 | LOW | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2010-4756) |
-| CVE-2018-20796 | libc6 | 2.31-13+deb11u11 | LOW | 7.5 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2018-20796) |
-| CVE-2019-1010022 | libc6 | 2.31-13+deb11u11 | LOW | 9.8 | High / High / High | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010022) |
-| CVE-2019-1010023 | libc6 | 2.31-13+deb11u11 | LOW | 8.8 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010023) |
-| CVE-2019-1010024 | libc6 | 2.31-13+deb11u11 | LOW | 5.3 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010024) |
-| CVE-2019-1010025 | libc6 | 2.31-13+deb11u11 | LOW | 5.3 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010025) |
-| CVE-2019-9192 | libc6 | 2.31-13+deb11u11 | LOW | 7.5 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-9192) |
-| CVE-2025-4802 | libc6 | 2.31-13+deb11u11 | UNKNOWN | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2025-4802) |
+| CVE-2025-4802 | libc-bin | 2.31-13+deb11u12 | HIGH | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2025-4802) |
+| CVE-2023-4806 | libc-bin | 2.31-13+deb11u12 | MEDIUM | 5.9 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-4806) |
+| CVE-2023-4813 | libc-bin | 2.31-13+deb11u12 | MEDIUM | 5.9 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-4813) |
+| CVE-2010-4756 | libc-bin | 2.31-13+deb11u12 | LOW | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2010-4756) |
+| CVE-2018-20796 | libc-bin | 2.31-13+deb11u12 | LOW | 7.5 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2018-20796) |
+| CVE-2019-1010022 | libc-bin | 2.31-13+deb11u12 | LOW | 9.8 | High / High / High | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010022) |
+| CVE-2019-1010023 | libc-bin | 2.31-13+deb11u12 | LOW | 8.8 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010023) |
+| CVE-2019-1010024 | libc-bin | 2.31-13+deb11u12 | LOW | 5.3 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010024) |
+| CVE-2019-1010025 | libc-bin | 2.31-13+deb11u12 | LOW | 5.3 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010025) |
+| CVE-2019-9192 | libc-bin | 2.31-13+deb11u12 | LOW | 7.5 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-9192) |
+| CVE-2025-4802 | libc6 | 2.31-13+deb11u12 | HIGH | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2025-4802) |
+| CVE-2023-4806 | libc6 | 2.31-13+deb11u12 | MEDIUM | 5.9 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-4806) |
+| CVE-2023-4813 | libc6 | 2.31-13+deb11u12 | MEDIUM | 5.9 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-4813) |
+| CVE-2010-4756 | libc6 | 2.31-13+deb11u12 | LOW | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2010-4756) |
+| CVE-2018-20796 | libc6 | 2.31-13+deb11u12 | LOW | 7.5 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2018-20796) |
+| CVE-2019-1010022 | libc6 | 2.31-13+deb11u12 | LOW | 9.8 | High / High / High | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010022) |
+| CVE-2019-1010023 | libc6 | 2.31-13+deb11u12 | LOW | 8.8 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010023) |
+| CVE-2019-1010024 | libc6 | 2.31-13+deb11u12 | LOW | 5.3 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010024) |
+| CVE-2019-1010025 | libc6 | 2.31-13+deb11u12 | LOW | 5.3 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-1010025) |
+| CVE-2019-9192 | libc6 | 2.31-13+deb11u12 | LOW | 7.5 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2019-9192) |
 | CVE-2023-23914 | libcurl4 | 7.74.0-1.3+deb11u14 | CRITICAL | 9.1 | High / High / High | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-23914) |
 | CVE-2022-42916 | libcurl4 | 7.74.0-1.3+deb11u14 | HIGH | 7.5 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2022-42916) |
 | CVE-2022-43551 | libcurl4 | 7.74.0-1.3+deb11u14 | HIGH | 7.5 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2022-43551) |
