@@ -32,3 +32,9 @@ jobs:
           else
             echo " No vulnerabilities found."
           fi
+
+      - name: Upload Snyk SARIF
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-sarif
+          path: snyk.sarif
