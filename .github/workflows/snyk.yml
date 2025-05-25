@@ -6,10 +6,12 @@ on:
 jobs:
   snyk-scan:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Snyk Multi-Project Scan
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Run Snyk vulnerability scan
         uses: snyk/actions/maven@master
         continue-on-error: true
         env:
@@ -25,8 +27,35 @@ jobs:
           echo "RESULTS_LENGTH=$RESULTS_LENGTH" >> $GITHUB_ENV
           echo "Found $RESULTS_LENGTH vulnerabilities."
 
-      - name: Upload Snyk Results
+      - name: Fail job if vulnerabilities exist
+        run: |
+          if [ "$RESULTS_LENGTH" != 0 ]; then
+            echo "❌ Found $RESULTS_LENGTH vulnerabilities!"
+          else
+            echo "✅ No vulnerabilities found."
+          fi
+
+      - name: Generate Markdown Report (Snyk only or partial)
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          chmod +x generate-security-report.sh
+          ./generate-security-report.sh
+
+      - name: Upload security-report.md
         uses: actions/upload-artifact@v4
         with:
-          name: snyk-results
-          path: snyk.sarif
+          name: security-report
+          path: security-report.md
+
+      - name: Commit security report
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git checkout main
+          git pull origin main
+          git add -f security-report.md
+          git commit -m "🛡️ Add latest security scan report from Snyk"
+          git push https://x-access-token:$GH_TOKEN@github.com/PhuHuynh197/ProjectSCGH.git main
