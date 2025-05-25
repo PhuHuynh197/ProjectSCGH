@@ -6,12 +6,10 @@ on:
 jobs:
   snyk-scan:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Run Snyk vulnerability scan
+      - name: Snyk Multi-Project Scan
         uses: snyk/actions/maven@master
         continue-on-error: true
         env:
@@ -35,7 +33,7 @@ jobs:
             echo " No vulnerabilities found."
           fi
 
-      - name: Generate Markdown Report (Snyk only or partial)
+      - name: Generate Markdown Report (Trivy + Snyk + Sonar)
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
@@ -57,5 +55,5 @@ jobs:
           git checkout main
           git pull origin main
           git add -f security-report.md
-          git commit -m "🛡️ Add latest security scan report from Snyk"
+          git commit -m " Add latest security scan report"
           git push https://x-access-token:$GH_TOKEN@github.com/PhuHuynh197/ProjectSCGH.git main
