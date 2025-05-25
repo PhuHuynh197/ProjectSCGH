@@ -1,4 +1,4 @@
-# 🛡️ Security Vulnerability Report (Generated: Sat May 24 04:08:46 UTC 2025)
+# 🛡️ Security Vulnerability Report (Generated: Sun May 25 18:37:10 UTC 2025)
 
 
 ## 🔍 Trivy Scan Report from `trivy-fs.json`
@@ -202,13 +202,13 @@
 | CVE-2022-0563 | mount | 2.36.1-8+deb11u2 | LOW | 5.5 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2022-0563) |
 | CVE-2023-50495 | ncurses-base | 6.2+20201114-2+deb11u2 | MEDIUM | 6.5 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-50495) |
 | CVE-2023-50495 | ncurses-bin | 6.2+20201114-2+deb11u2 | MEDIUM | 6.5 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-50495) |
-| CVE-2024-13176 | openssl | 1.1.1w-0+deb11u2 | MEDIUM | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2024-13176) |
 | CVE-2007-5686 | passwd | 1:4.8.1-1+deb11u1 | LOW | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2007-5686) |
 | CVE-2013-4235 | passwd | 1:4.8.1-1+deb11u1 | LOW | 4.7 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2013-4235) |
 | CVE-2024-56433 | passwd | 1:4.8.1-1+deb11u1 | LOW | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2024-56433) |
 | TEMP-0628843-DBAD28 | passwd | 1:4.8.1-1+deb11u1 | LOW | N/A | None / None / None | V0 - Unclassified | [link](https://security-tracker.debian.org/tracker/TEMP-0628843-DBAD28) |
 | CVE-2011-4116 | perl-base | 5.32.1-4+deb11u4 | LOW | 7.5 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2011-4116) |
 | CVE-2023-31486 | perl-base | 5.32.1-4+deb11u4 | LOW | 8.1 | Medium / Medium / Medium | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-31486) |
+| CVE-2025-40909 | perl-base | 5.32.1-4+deb11u4 | UNKNOWN | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2025-40909) |
 | TEMP-0517018-A83CE6 | sysvinit-utils | 2.96-7+deb11u1 | LOW | N/A | None / None / None | V0 - Unclassified | [link](https://security-tracker.debian.org/tracker/TEMP-0517018-A83CE6) |
 | CVE-2005-2541 | tar | 1.34+dfsg-1+deb11u1 | LOW | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2005-2541) |
 | TEMP-0290435-0B57B5 | tar | 1.34+dfsg-1+deb11u1 | LOW | N/A | None / None / None | V0 - Unclassified | [link](https://security-tracker.debian.org/tracker/TEMP-0290435-0B57B5) |
