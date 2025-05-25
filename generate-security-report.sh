@@ -37,7 +37,6 @@ extract_trivy_json() {
   local FILE=$1
   echo -e "\n## Trivy Scan Report from \`$FILE\`" >> $OUTPUT_FILE
 
-  # Đếm tổng số vulnerabilities thực tế từ tất cả Results
   local VULN_COUNT
   VULN_COUNT=$(jq '[.Results[]? | select(.Vulnerabilities != null) | .Vulnerabilities[]?] | length' "$FILE")
 
@@ -97,8 +96,7 @@ extract_sonar_summary() {
     echo " Skipped SonarCloud summary (missing SONAR_TOKEN env)" >> $OUTPUT_FILE
     return
   fi
-  
-  # Determine repo name for SonarCloud component
+
   REPO_NAME=$(basename "$(git config --get remote.origin.url)" .git)
   API_URL="https://sonarcloud.io/api/measures/component?component=PhuHuynh197_${REPO_NAME}&metricKeys=bugs,vulnerabilities,security_hotspots"
 
@@ -118,14 +116,20 @@ extract_sonar_summary() {
 }
 
 # --- Run All Extractors ---
-[ -f trivy-fs.json ] && extract_trivy_json "trivy-fs.json"
-[ -f trivy-image.json ] && extract_trivy_json "trivy-image.json"
-[ -f snyk.sarif ] && extract_snyk_sarif "snyk.sarif"
-if [ ! -f trivy-image.json ]; then
-  echo -e "\n## Trivy Scan Report from \`trivy-image.json\`" >> $OUTPUT_FILE
-  echo "** Skipped: No Docker image was built, so image scan did not run.**" >> $OUTPUT_FILE
+if [ -f trivy-fs.json ]; then
+  extract_trivy_json "trivy-fs.json"
 fi
 
-extract_sonar_summary
+if [ -f trivy-image.json ]; then
+  extract_trivy_json "trivy-image.json"
+fi
+
+if [ -f snyk.sarif ]; then
+  extract_snyk_sarif "snyk.sarif"
+fi
+
+if [[ -n "$SONAR_TOKEN" ]]; then
+  extract_sonar_summary
+fi
 
 echo -e "\n Done. Generated $OUTPUT_FILE"
