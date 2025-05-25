@@ -1,4 +1,4 @@
-name: Trivy Scan & Generate Report
+name: Trivy Scan
 
 on:
   workflow_dispatch:
@@ -53,5 +53,5 @@ jobs:
           git checkout main
           git pull origin main
           git add -f security-report.md
-          git commit -m "🛡️ Add security scan report from Trivy"
+          git commit -m " Add security scan report from Trivy"
           git push https://x-access-token:$GH_TOKEN@github.com/PhuHuynh197/ProjectSCGH.git main
