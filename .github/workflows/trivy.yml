@@ -1,0 +1,32 @@
+name: Trivy Scan
+
+on:
+  workflow_dispatch:
+
+jobs:
+  trivy-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -y && sudo apt-get install -y trivy
+
+      - name: Trivy FileSystem Scan
+        run: trivy fs . --format json -o trivy-fs.json
+
+      - name: Build Docker image
+        run: |
+          docker build -t projectscgh:latest . || echo "Skip docker build if no Dockerfile"
+
+      - name: Trivy Docker Image Scan
+        run: |
+          if [ -f Dockerfile ]; then
+            trivy image projectscgh:latest --format json -o trivy-image.json
+          else
+            echo "No Dockerfile found, skipping image scan."
+          fi
