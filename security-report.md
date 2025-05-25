@@ -1,7 +1,7 @@
-# 🛡️ Security Vulnerability Report (Generated: Sun May 25 18:37:10 UTC 2025)
+# Security Vulnerability Report (Generated: Sun May 25 18:48:23 UTC 2025)
 
 
-## 🔍 Trivy Scan Report from `trivy-fs.json`
+## Trivy Scan Report from `trivy-fs.json`
 | CVE | Package | Version | Severity | CVSS | CIA | ASVS | Link |
 |-----|---------|---------|----------|------|-----|------|------|
 | CVE-2024-12798 | ch.qos.logback:logback-core | 1.5.7 | MEDIUM | N/A | None / None / None | V5.3 - Logging and Encoding | [link](https://avd.aquasec.com/nvd/cve-2024-12798) |
@@ -75,7 +75,7 @@
 | CVE-2024-38816 | org.springframework:spring-webmvc | 6.1.12 | HIGH | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2024-38816) |
 | CVE-2024-38819 | org.springframework:spring-webmvc | 6.1.12 | HIGH | N/A | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2024-38819) |
 
-## 🔍 Trivy Scan Report from `trivy-image.json`
+## Trivy Scan Report from `trivy-image.json`
 | CVE | Package | Version | Severity | CVSS | CIA | ASVS | Link |
 |-----|---------|---------|----------|------|-----|------|------|
 | CVE-2011-3374 | apt | 2.2.4 | LOW | 3.7 | None / None / None | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2011-3374) |
@@ -215,7 +215,7 @@
 | CVE-2022-0563 | util-linux | 2.36.1-8+deb11u2 | LOW | 5.5 | Low / Low / Low | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2022-0563) |
 | CVE-2023-45853 | zlib1g | 1:1.2.11.dfsg-2+deb11u2 | CRITICAL | 9.8 | High / High / High | V0 - Unclassified | [link](https://avd.aquasec.com/nvd/cve-2023-45853) |
 
-## 📊 SonarCloud Summary
+## SonarCloud Summary
 * bugs: 1
 * vulnerabilities: 0
 * security_hotspots: 2
