@@ -30,3 +30,10 @@ jobs:
           else
             echo "No Dockerfile found, skipping image scan."
           fi
+      - name: Upload Trivy Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-files
+          path: |
+            trivy-fs.json
+            trivy-image.json
