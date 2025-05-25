@@ -1,8 +1,12 @@
-# Security Vulnerability Report (Generated: Sun May 25 21:23:17 UTC 2025)
+# Security Vulnerability Report (Generated: Sun May 25 21:31:29 UTC 2025)
 
 
-## Trivy Scan Report from `trivy-image.json`
-** Skipped: No Docker image was built, so image scan did not run.**
+## Snyk Scan Report from `snyk.sarif`
+- **Rule ID**: java/HardcodedPassword  
+  - **Message**: Do not hardcode passwords in code. Found hardcoded password used in here.  
+  - **Severity**: warning  
+  - **Location**: src/main/java/com/example/bankapp/BadCodeExample.java:13  
+
 
 ## SonarCloud Summary
 * bugs: 1
