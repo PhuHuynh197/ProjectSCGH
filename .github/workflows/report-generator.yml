@@ -11,12 +11,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download artifacts from Trivy and Snyk
+      - name: Download Trivy Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: . 
+          name: trivy-results
+          path: .
 
-      - name: Set executable permission for report script and run
+      - name: Download Snyk Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: snyk-results
+          path: .
+
+      - name: Set executable permission and run report
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
