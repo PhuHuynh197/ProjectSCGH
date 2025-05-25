@@ -31,7 +31,7 @@ jobs:
             echo "No Dockerfile found, skipping image scan."
           fi
 
-      - name: Generate Markdown Report
+      - name: Generate Markdown Report (Trivy + Snyk + Sonar)
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
@@ -44,7 +44,7 @@ jobs:
           name: security-report
           path: security-report.md
 
-      - name: Commit security report to repo
+      - name: Commit security report
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
@@ -53,5 +53,5 @@ jobs:
           git checkout main
           git pull origin main
           git add -f security-report.md
-          git commit -m " Add security scan report from Trivy"
+          git commit -m " Add latest security scan report"
           git push https://x-access-token:$GH_TOKEN@github.com/PhuHuynh197/ProjectSCGH.git main
