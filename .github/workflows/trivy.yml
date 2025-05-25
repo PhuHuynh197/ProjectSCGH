@@ -13,7 +13,7 @@ jobs:
         run: |
           sudo apt-get install -y wget apt-transport-https gnupg lsb-release
           wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
           sudo apt-get update -y && sudo apt-get install -y trivy
 
       - name: Trivy FileSystem Scan
@@ -30,10 +30,11 @@ jobs:
           else
             echo "No Dockerfile found, skipping image scan."
           fi
-      - name: Upload Trivy Files
+
+      - name: Upload Trivy Results
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-files
+          name: trivy-results
           path: |
             trivy-fs.json
             trivy-image.json
