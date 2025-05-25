@@ -30,9 +30,9 @@ jobs:
       - name: Fail job if vulnerabilities exist
         run: |
           if [ "$RESULTS_LENGTH" != 0 ]; then
-            echo "❌ Found $RESULTS_LENGTH vulnerabilities!"
+            echo " Found $RESULTS_LENGTH vulnerabilities!"
           else
-            echo "✅ No vulnerabilities found."
+            echo " No vulnerabilities found."
           fi
 
       - name: Generate Markdown Report (Snyk only or partial)
