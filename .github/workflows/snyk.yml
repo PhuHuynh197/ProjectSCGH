@@ -25,16 +25,8 @@ jobs:
           echo "RESULTS_LENGTH=$RESULTS_LENGTH" >> $GITHUB_ENV
           echo "Found $RESULTS_LENGTH vulnerabilities."
 
-      - name: Fail job if vulnerabilities exist
-        run: |
-          if [ "$RESULTS_LENGTH" != 0 ]; then
-            echo " Found $RESULTS_LENGTH vulnerabilities!"
-          else
-            echo " No vulnerabilities found."
-          fi
-
-      - name: Upload Snyk SARIF
+      - name: Upload Snyk Results
         uses: actions/upload-artifact@v4
         with:
-          name: snyk-sarif
+          name: snyk-results
           path: snyk.sarif
