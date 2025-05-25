@@ -128,7 +128,7 @@ if [ -f snyk.sarif ]; then
   extract_snyk_sarif "snyk.sarif"
 fi
 
-if [[ -n "$SONAR_TOKEN" ]]; then
+if [[ -n "$SONAR_TOKEN" && "$GITHUB_WORKFLOW" == *"SonarCloud"* ]]; then
   extract_sonar_summary
 fi
 
