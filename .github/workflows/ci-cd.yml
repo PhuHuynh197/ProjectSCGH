@@ -5,6 +5,17 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_job:
+        description: 'Chọn công cụ bảo mật cần chạy'
+        required: true
+        default: 'sonarcloud-scan'
+        type: choice
+        options:
+          - sonarcloud-scan
+          - snyk-scan
+          - trivy-scan
 
 jobs:
   build:
@@ -24,6 +35,7 @@ jobs:
           if [ -f pom.xml ]; then mvn clean compile; fi
 
   sonarcloud-scan:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_job == 'sonarcloud-scan' }}
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -46,6 +58,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   snyk-scan:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_job == 'snyk-scan' }}
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -76,6 +89,7 @@ jobs:
           fi
 
   trivy-scan:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.run_job == 'trivy-scan' }}
     runs-on: ubuntu-latest
     needs: build
     steps:
