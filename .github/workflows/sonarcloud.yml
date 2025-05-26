@@ -25,6 +25,18 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+      - name: Fail job if SonarCloud found vulnerabilities
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          REPO_NAME=$(basename "$(git config --get remote.origin.url)" .git)
+          RESPONSE=$(curl -s -u "${SONAR_TOKEN}:" "https://sonarcloud.io/api/measures/component?component=PhuHuynh197_${REPO_NAME}&metricKeys=vulnerabilities")
+          VULNS=$(echo "$RESPONSE" | jq -r '.component.measures[0].value // 0')
+          echo "Found $VULNS vulnerabilities on SonarCloud"
+          if [ "$VULNS" != "0" ]; then
+            exit 1
+          fi
+
       - name: Generate Markdown Report (Trivy + Snyk + Sonar)
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
