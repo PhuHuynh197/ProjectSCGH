@@ -29,21 +29,19 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          # Lấy key từ file nếu có
+
           if [ -f sonar-project.properties ]; then
             COMPONENT_KEY=$(grep "^sonar.projectKey=" sonar-project.properties | cut -d= -f2)
           else
             COMPONENT_KEY="PhuHuynh197_ProjectSCGH"
           fi
 
-          # Gọi API lấy đầy đủ metrics
           API_URL="https://sonarcloud.io/api/measures/component?component=${COMPONENT_KEY}&metricKeys=bugs,vulnerabilities,security_hotspots"
           RESPONSE=$(curl -s -u "${SONAR_TOKEN}:" "$API_URL")
 
           echo "SonarCloud API response:"
           echo "$RESPONSE"
 
-          # Parse từng metric
           BUGS=$(echo "$RESPONSE" | jq -r '.component.measures[] | select(.metric == "bugs") | .value // "0"')
           VULNS=$(echo "$RESPONSE" | jq -r '.component.measures[] | select(.metric == "vulnerabilities") | .value // "0"')
           HOTSPOTS=$(echo "$RESPONSE" | jq -r '.component.measures[] | select(.metric == "security_hotspots") | .value // "0"')
@@ -52,12 +50,10 @@ jobs:
           echo "Vulnerabilities: $VULNS"
           echo "Security Hotspots: $HOTSPOTS"
 
-          # Fail nếu bất kỳ chỉ số nào > 0
           if [ "$BUGS" != "0" ] || [ "$VULNS" != "0" ] || [ "$HOTSPOTS" != "0" ]; then
             echo "Found issues! Failing job."
             exit 1
           fi
-
 
       - name: Generate Markdown Report (Trivy + Snyk + Sonar)
         if: always()
