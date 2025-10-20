@@ -8,9 +8,10 @@ on:
 jobs:
   depcheck:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: .NET Vulnerable Packages
         run: |
           if command -v dotnet >/dev/null 2>&1; then
@@ -18,7 +19,7 @@ jobs:
             dotnet list package --vulnerable || true
           fi
       - name: Run OWASP Dependency-Check
-        uses: dependency-check/Dependency-Check_Action@v4
+        uses: dependency-check/Dependency-Check_Action@v3.2.1
         with:
           project: "${{ github.repository }}"
           path: "."
@@ -29,7 +30,6 @@ jobs:
             --enableExperimental
         continue-on-error: true
 
-      # Upload báo cáo
       - name: Publish HTML report
         if: always()
         uses: actions/upload-artifact@v4
