@@ -21,7 +21,7 @@ jobs:
       - name: Prepare security folder
         run: mkdir -p security
 
-      - name: Run Gitleaks (scan full repository)
+      - name: Run Gitleaks (full repository scan)
         run: |
           echo "Running Gitleaks scan on full repository..."
           docker run --rm \
@@ -31,13 +31,14 @@ jobs:
             --report-format sarif \
             --report-path="/repo/security/gitleaks.sarif" \
             --verbose \
+            --redact \
             --no-banner
 
       - name: Debug SARIF output
         run: |
-          echo "---- files in /security ----"
+          echo "---- Files in /security ----"
           ls -la security || echo "No security folder found."
-          echo "---- Preview first lines of gitleaks.sarif ----"
+          echo "---- Preview SARIF content ----"
           head -n 100 security/gitleaks.sarif || echo "No SARIF file generated."
 
       - name: Install jq
@@ -49,15 +50,15 @@ jobs:
         run: |
           if [ -f security/gitleaks.sarif ]; then
             COUNT=$(jq '.runs[0].results | length' security/gitleaks.sarif 2>/dev/null || echo 0)
-            echo "Gitleaks findings: $COUNT"
+            echo "🔍 Gitleaks findings: $COUNT"
             if [ "$COUNT" -gt 0 ]; then
               echo "::error:: Gitleaks detected $COUNT secrets - failing job!"
               exit 1
             else
-              echo " No secrets found by Gitleaks."
+              echo "No secrets found by Gitleaks."
             fi
           else
-            echo "::warning::SARIF file not generated - possible path or mount issue."
+            echo "::warning:: SARIF file not generated - possible mount or permission issue."
             exit 1
           fi
 
@@ -67,7 +68,7 @@ jobs:
         with:
           sarif_file: security/gitleaks.sarif
 
-      - name: Upload artifact (gitleaks report)
+      - name: Upload artifact (gitleaks-report)
         if: always()
         uses: actions/upload-artifact@v4
         with:
