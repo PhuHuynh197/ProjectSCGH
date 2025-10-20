@@ -31,15 +31,15 @@ jobs:
             --report-format sarif \
             --report-path="/repo/security/gitleaks.sarif" \
             --verbose \
-            --redact \
-            --no-banner
+            --no-banner \
+            --no-git
 
       - name: Debug SARIF output
         run: |
-          echo "---- Files in /security ----"
+          echo "---- Files in security/ ----"
           ls -la security || echo "No security folder found."
-          echo "---- Preview SARIF content ----"
-          head -n 100 security/gitleaks.sarif || echo "No SARIF file generated."
+          echo "---- Preview SARIF ----"
+          head -n 100 security/gitleaks.sarif || echo "No SARIF generated."
 
       - name: Install jq
         run: |
@@ -58,7 +58,7 @@ jobs:
               echo "No secrets found by Gitleaks."
             fi
           else
-            echo "::warning:: SARIF file not generated - possible mount or permission issue."
+            echo "::warning:: SARIF not generated - possible path issue."
             exit 1
           fi
 
@@ -68,7 +68,7 @@ jobs:
         with:
           sarif_file: security/gitleaks.sarif
 
-      - name: Upload artifact (gitleaks-report)
+      - name: Upload artifact (gitleaks report)
         if: always()
         uses: actions/upload-artifact@v4
         with:
