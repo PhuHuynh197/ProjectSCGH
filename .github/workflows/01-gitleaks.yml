@@ -19,11 +19,11 @@ jobs:
       - name: Prepare security folder
         run: mkdir -p security
 
-      - name: Run Gitleaks (full repo scan) - create SARIF
+      - name: Run Gitleaks (no docker mount bug)
         run: |
-          echo "Running gitleaks full-repo scan..."
+          echo "Running Gitleaks directly on repo..."
           docker run --rm \
-            -v "${{ github.workspace }}:/repo" \
+            -v "$PWD:/repo" \
             zricethezav/gitleaks:latest detect \
             --source="/repo" \
             --no-banner \
@@ -31,42 +31,40 @@ jobs:
             --report-format sarif \
             --report-path "/repo/security/gitleaks.sarif" || true
 
-      - name: Debug list security folder and head of SARIF
+      - name: Debug: verify SARIF
         run: |
-          echo "---- files in security/ ----"
+          echo "---- Security folder ----"
           ls -la security || true
-          echo "---- head of security/gitleaks.sarif ----"
-          head -n 200 security/gitleaks.sarif || echo "no sarif file present"
+          echo "---- SARIF head ----"
+          head -n 80 security/gitleaks.sarif || echo "No sarif found"
 
-      - name: Install jq for SARIF parsing
+      - name: Install jq
         run: |
           sudo apt-get update -y
           sudo apt-get install -y jq
 
-      - name: Fail job if Gitleaks found secrets
+      - name: Fail if leaks found
         run: |
           if [ -f security/gitleaks.sarif ]; then
             COUNT=$(jq '.runs[0].results | length' security/gitleaks.sarif 2>/dev/null || echo 0)
             echo "Gitleaks findings: $COUNT"
             if [ "$COUNT" -gt 0 ]; then
-              echo "::error ::Gitleaks detected secrets (count=$COUNT) - failing job by design."
-              # Export findings to output for other jobs (optional)
-              echo "GITLEAKS_FINDINGS=$COUNT" >> $GITHUB_ENV
+              echo "::error::Gitleaks found secrets ($COUNT)."
               exit 1
             else
               echo "No findings from Gitleaks."
             fi
           else
-            echo "No gitleaks.sarif produced - skipping fail check."
+            echo "SARIF not generated."
           fi
 
-      - name: Upload SARIF to GitHub Security tab (import as code scanning)
+      - name: Upload SARIF to Security tab
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: security/gitleaks.sarif
 
-      - name: Upload artifact (gitleaks sarif)
+      - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
