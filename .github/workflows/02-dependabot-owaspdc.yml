@@ -2,18 +2,18 @@ name: Dependency Audit - OWASP DC
 
 on:
   push:
-    branches: ["main"]
+    branches: ["**"]
   pull_request:
-    branches: ["main"]
   workflow_dispatch:
 
 jobs:
   depcheck:
+    name: Run OWASP Dependency-Check
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Run OWASP Dependency-Check via Docker
         env:
@@ -30,11 +30,16 @@ jobs:
             --format "HTML,XML" \
             --out /src/security \
             --enableExperimental \
-            --nvdApiKey ${{ secrets.NVD_API_KEY }} \
-            --failOnCVSS 7 || echo "Dependency-Check found vulnerabilities but report was still generated."
+            --failOnCVSS 7 \
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
 
-          echo " Reports generated in /security directory:"
-          ls -la security || echo "No security folder found."
+          echo "Checking for High or Critical CVE..."
+          if grep -q 'CVSSv3_Severity="HIGH"' security/dependency-check-report.xml || grep -q 'CVSSv3_Severity="CRITICAL"' security/dependency-check-report.xml; then
+            echo "::error::High/Critical vulnerabilities found!"
+            exit 1
+          else
+            echo "No high or critical vulnerabilities found."
+          fi
 
       - name: Upload HTML/XML reports
         if: always()
@@ -44,13 +49,3 @@ jobs:
           path: |
             security/dependency-check-report.html
             security/dependency-check-report.xml
-
-      - name: Fail job if high severity vulnerabilities found
-        if: always()
-        run: |
-          if grep -q 'CVSSv3_Severity="HIGH"' security/dependency-check-report.xml || grep -q 'CVSSv3_Severity="CRITICAL"' security/dependency-check-report.xml; then
-            echo "::error::High or critical vulnerabilities detected!"
-            exit 1
-          else
-            echo "No high or critical vulnerabilities found."
-          fi
