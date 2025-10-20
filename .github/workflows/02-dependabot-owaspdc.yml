@@ -1,4 +1,4 @@
-name: Dependency Audit - OWASP Dependency-Check
+name: Dependency Audit - OWASP Dependency-Check (Stable Docker Run)
 
 on:
   workflow_dispatch:
@@ -11,9 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Lấy code từ repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Cài JDK & build Maven để tải dependency
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -21,23 +23,59 @@ jobs:
           java-version: '17'
 
       - name: Build project with Maven
-        run: mvn clean install -DskipTests
+        run: mvn -B clean install -DskipTests
 
-      - name: Run OWASP Dependency-Check
-        uses: dependency-check/Dependency-Check_Action@main
-        with:
-          project: 'ProjectSCGH'
-          path: '.'            
-          format: 'HTML,XML'
-          out: 'security'          
-          args: >
-            --scan ./pom.xml
-            --failOnCVSS 7
-            --enableRetired
-            --enableExperimental
+      # 3️⃣ Tạo thư mục lưu báo cáo
+      - name: Prepare security folder
+        run: mkdir -p security
 
-      - name: Upload Dependency-Check Report
+      # 4️⃣ Chạy OWASP Dependency-Check bằng Docker
+      - name: Run OWASP Dependency-Check via Docker
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          echo "🚀 Running OWASP Dependency-Check..."
+          echo "📄 pom.xml located at:"
+          find . -name pom.xml
+
+          docker run --rm -u root \
+            -e NVD_API_KEY=${{ secrets.NVD_API_KEY }} \
+            -v "$(pwd):/src" \
+            -w /src \
+            owasp/dependency-check:latest \
+            --project "ProjectSCGH" \
+            --scan ./pom.xml \
+            --format "HTML,XML" \
+            --out /src/security \
+            --enableExperimental \
+            --failOnCVSS 7 || true
+
+          echo "✅ Scan completed. Reports saved to ./security"
+          echo "📁 Files generated:"
+          ls -lah security || echo "⚠️ No reports generated."
+
+      # 5️⃣ Upload HTML/XML reports lên Artifacts
+      - name: Upload Dependency-Check Reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report
-          path: security
+          path: security/
+
+      # 6️⃣ Fail nếu có lỗ hổng nghiêm trọng
+      - name: Fail if high vulnerabilities found
+        if: always()
+        run: |
+          if [ -f security/dependency-check-report.html ]; then
+            HIGH=$(grep -c "HIGH" security/dependency-check-report.html || true)
+            CRITICAL=$(grep -c "CRITICAL" security/dependency-check-report.html || true)
+            echo "🔍 Found $HIGH HIGH and $CRITICAL CRITICAL vulnerabilities."
+            if [ "$HIGH" -gt 0 ] || [ "$CRITICAL" -gt 0 ]; then
+              echo "::error::❌ High/Critical vulnerabilities detected in dependencies."
+              exit 1
+            else
+              echo "✅ No high/critical vulnerabilities found."
+            fi
+          else
+            echo "::warning::⚠️ No report file found."
+          fi
