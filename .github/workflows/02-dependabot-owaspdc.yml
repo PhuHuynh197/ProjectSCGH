@@ -32,7 +32,7 @@ jobs:
             --failOnCVSS 7 \
             --nvdApiKey ${{ secrets.NVD_API_KEY }} || true
 
-          echo "✅ Dependency-Check completed. Reports saved to /security/"
+          echo " Dependency-Check completed. Reports saved to /security/"
 
       - name: Upload HTML/XML reports
         if: always()
