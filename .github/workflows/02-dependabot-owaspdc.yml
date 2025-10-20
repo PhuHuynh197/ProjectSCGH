@@ -2,12 +2,13 @@ name: Dependency Audit - OWASP DC
 
 on:
   push:
-    branches: [ "**" ]
+    branches: ["**"]
   pull_request:
   workflow_dispatch:
 
 jobs:
   depcheck:
+    name: Run OWASP Dependency-Check
     runs-on: ubuntu-latest
 
     steps:
@@ -29,9 +30,16 @@ jobs:
             --format "HTML,XML" \
             --out /src/security \
             --enableExperimental \
-            --failOnCVSS 7 || true
+            --failOnCVSS 7 \
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
 
-          echo "Dependency-Check completed. Reports saved to /security/"
+          echo "Checking for High or Critical CVE..."
+          if grep -q 'CVSSv3_Severity="HIGH"' security/dependency-check-report.xml || grep -q 'CVSSv3_Severity="CRITICAL"' security/dependency-check-report.xml; then
+            echo "::error::High/Critical vulnerabilities found!"
+            exit 1
+          else
+            echo "No high or critical vulnerabilities found."
+          fi
 
       - name: Upload HTML/XML reports
         if: always()
