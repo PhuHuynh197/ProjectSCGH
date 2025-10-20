@@ -3,7 +3,7 @@ name: Dependency Audit - OWASP DC
 on:
   workflow_dispatch:
   push:
-    branches: [ "**" ]
+    branches: [ "main" ]
   pull_request:
 
 jobs:
@@ -17,30 +17,28 @@ jobs:
       - name: Prepare security folder
         run: |
           mkdir -p ${{ github.workspace }}/security
-          echo "Created folder: ${{ github.workspace }}/security"
+          chmod 777 ${{ github.workspace }}/security
+          echo "Created folder and granted permission to /security"
 
       - name: Run OWASP Dependency-Check via Docker
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
-          echo "Running OWASP Dependency-Check..."
-          mkdir -p security
-
+          echo " Running OWASP Dependency-Check for full project..."
           docker run --rm \
             -u root \
             -e NVD_API_KEY=${{ secrets.NVD_API_KEY }} \
             -v "${{ github.workspace }}:/src" \
             -w /src \
             owasp/dependency-check:latest \
-            --project "CI Dependency Scan" \
-            --scan /src \
+            --project "Full Project Scan" \
+            --scan /src \                       
             --out /src/security \
             --format "HTML,XML" \
             --enableExperimental \
-            --failOnCVSS 7 || true
+            --failOnCVSS 7 || true              
 
           echo "Scan completed. Reports saved to /src/security"
-
           echo "Listing generated files:"
           ls -lah security || echo "No reports found"
 
@@ -58,12 +56,17 @@ jobs:
         if: always()
         run: |
           if [ -f security/dependency-check-report.html ]; then
-            if grep -q "HIGH" security/dependency-check-report.html; then
-              echo "::error::High vulnerabilities detected in dependencies."
+            echo "Checking for high or critical vulnerabilities..."
+            if grep -q "CRITICAL" security/dependency-check-report.html; then
+              echo "::error::Critical vulnerabilities detected!"
+              exit 1
+            elif grep -q "HIGH" security/dependency-check-report.html; then
+              echo "::error::High vulnerabilities detected!"
               exit 1
             else
-              echo "No high severity vulnerabilities found."
+              echo "No high or critical vulnerabilities found."
             fi
           else
-            echo "::warning::No report file found to analyze."
+            echo "::error::No dependency-check report found. Something went wrong."
+            exit 1
           fi
