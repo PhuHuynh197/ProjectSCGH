@@ -3,8 +3,8 @@
 
 public class BadSecretExample {
 
-    // ✅ GitHub Personal Access Token
-    private static final String GITHUB_TOKEN = "ghp_1234567890abcdefABCDEF1234567890abcdef";
+    // ✅ GitHub PAT (36 ký tự sau "ghp_")
+    private static final String GITHUB_TOKEN = "ghp_1234567890abcdefABCDEF1234567890abcdef12";
 
     // ✅ AWS Access Key ID
     private static final String AWS_ACCESS_KEY_ID = "AKIAIOSFODNN7EXAMPLE";
@@ -15,6 +15,6 @@ public class BadSecretExample {
     // ✅ Google API Key
     private static final String GOOGLE_API_KEY = "AIzaSyA-1234567890abcdefGhIjKlMnOpQrStUvWxYz1";
 
-    // ✅ Database password
+    // ✅ Fake DB Password
     private static final String DB_PASSWORD = "SuperSecret123!";
 }
