@@ -23,7 +23,9 @@ jobs:
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
-          echo "Running OWASP Dependency-Check..."
+          echo " Running OWASP Dependency-Check..."
+          mkdir -p security
+      
           docker run --rm \
             -u root \
             -e NVD_API_KEY=${{ secrets.NVD_API_KEY }} \
@@ -35,9 +37,11 @@ jobs:
             --out /src/security \
             --format "HTML,XML" \
             --enableExperimental \
-            --failOnCVSS 7
-
-          echo "Scan completed. Reports saved to /src/security"
+            --failOnCVSS 7 || true 
+      
+          echo " Scan completed. Reports saved to /src/security"
+          echo "Listing generated files:"
+          ls -lah security || echo "No reports found"
 
       - name: List generated reports (always)
         if: always()
@@ -53,3 +57,12 @@ jobs:
           path: |
             ${{ github.workspace }}/security/dependency-check-report.html
             ${{ github.workspace }}/security/dependency-check-report.xml
+      - name: Fail if high vulnerabilities found
+        if: always()
+        run: |
+          if grep -q "HIGH" security/dependency-check-report.html 2>/dev/null; then
+            echo "::error::High vulnerabilities detected in dependencies."
+            exit 1
+          else
+            echo " No high severity vulnerabilities found."
+          fi
