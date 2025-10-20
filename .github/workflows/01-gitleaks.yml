@@ -27,6 +27,7 @@ jobs:
             zricethezav/gitleaks:latest detect \
             --source="/repo" \
             --no-banner \
+            --no-git \
             --verbose \
             --report-format sarif \
             --report-path "/repo/security/gitleaks.sarif" || true
