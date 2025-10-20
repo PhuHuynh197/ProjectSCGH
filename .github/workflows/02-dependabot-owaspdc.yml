@@ -1,10 +1,10 @@
 name: Dependency Audit - OWASP DC
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "**" ]
   pull_request:
-  workflow_dispatch:
 
 jobs:
   depcheck:
@@ -13,38 +13,37 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Prepare security folder
         run: |
-          mkdir -p security
-          ls -la || true
+          mkdir -p ${{ github.workspace }}/security
+          echo "Created folder: ${{ github.workspace }}/security"
 
       - name: Run OWASP Dependency-Check via Docker
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
-          echo "Starting OWASP Dependency-Check scan..."
-          # mount workspace to /src, run as root so container có thể ghi file vào thư mục repo
+          echo "Running OWASP Dependency-Check..."
           docker run --rm \
             -u root \
             -e NVD_API_KEY=${{ secrets.NVD_API_KEY }} \
             -v "${{ github.workspace }}:/src" \
+            -w /src \
             owasp/dependency-check:latest \
+            --project "CI Dependency Scan" \
             --scan /src \
-            --format "HTML,XML" \
             --out /src/security \
+            --format "HTML,XML" \
             --enableExperimental \
             --failOnCVSS 7
 
-          echo "Dependency-Check finished (check /security for reports)"
+          echo "Scan completed. Reports saved to /src/security"
 
-      - name: Debug - list security folder (always)
+      - name: List generated reports (always)
         if: always()
         run: |
-          echo "Listing contents of security/ directory (for debugging):"
-          ls -lah security || echo "No files in security/"
+          echo "Checking for generated reports..."
+          ls -lah ${{ github.workspace }}/security || echo "No reports found"
 
       - name: Upload HTML/XML reports
         if: always()
@@ -52,5 +51,5 @@ jobs:
         with:
           name: dependency-check-report
           path: |
-            security/dependency-check-report.html
-            security/dependency-check-report.xml
+            ${{ github.workspace }}/security/dependency-check-report.html
+            ${{ github.workspace }}/security/dependency-check-report.xml
