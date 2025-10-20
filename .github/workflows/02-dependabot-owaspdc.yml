@@ -65,5 +65,5 @@ jobs:
               echo "No high severity vulnerabilities found."
             fi
           else
-            echo "::warning::⚠️ No report file found to analyze."
+            echo "::warning::No report file found to analyze."
           fi
