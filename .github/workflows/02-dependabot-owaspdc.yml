@@ -31,7 +31,7 @@ jobs:
             --out /src/security \
             --enableExperimental \
             --failOnCVSS 7 \
-            --nvdApiKey ${{ secrets.NVD_API_KEY }} || true
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
 
           echo "Checking for High or Critical CVE..."
           if grep -q 'CVSSv3_Severity="HIGH"' security/dependency-check-report.xml || grep -q 'CVSSv3_Severity="CRITICAL"' security/dependency-check-report.xml; then
