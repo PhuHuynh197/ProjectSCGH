@@ -13,4 +13,8 @@ public class BadSecretExample {
 
     // Fake db password string
     private static final String DB_PASS = "SuperSecret123!";
+    
+    // Fake AWS Access Key
+    private static final String AWS_ACCESS_KEY_ID = "AKIAIOSFODNN7EXAMPLE";
+
 }
