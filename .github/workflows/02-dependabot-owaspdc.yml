@@ -8,29 +8,29 @@ on:
 jobs:
   depcheck:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: .NET Vulnerable Packages
+      - name: Install Docker 
         run: |
-          if command -v dotnet >/dev/null 2>&1; then
-            dotnet restore || true
-            dotnet list package --vulnerable || true
-          fi
-      - name: Run OWASP Dependency-Check
-        uses: dependency-check/Dependency-Check_Action@v3.2.1
-        with:
-          project: "${{ github.repository }}"
-          path: "."
-          format: "HTML,XML"
-          out: "security"
-          args: >
-            --failOnCVSS 7
-            --enableExperimental
-        continue-on-error: true
+          sudo apt-get update -y
+          sudo apt-get install -y docker.io
 
-      - name: Publish HTML report
+      - name: Run OWASP Dependency-Check via Docker
+        run: |
+          mkdir -p security
+          docker run --rm \
+            -e NVD_API_KEY=${{ secrets.NVD_API_KEY }} \
+            -v $PWD:/src \
+            owasp/dependency-check:latest \
+            --scan /src \
+            --format "HTML,XML" \
+            --out /src/security \
+            --enableExperimental \
+            --failOnCVSS 7 \
+            --nvdApiKey ${{ secrets.NVD_API_KEY }} || true
+
+      - name: Upload HTML/XML reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
