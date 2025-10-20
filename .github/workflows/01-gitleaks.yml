@@ -17,20 +17,26 @@ jobs:
       - name: Prepare security folder
         run: mkdir -p security
 
-      - name: Run Gitleaks scan
+      - name: Run Gitleaks (full repo scan)
         run: |
           docker run --rm \
-            -v $(pwd):/path \
+            -v ${{ github.workspace }}:/repo \
             zricethezav/gitleaks:latest detect \
-            --source="/path" \
+            --source="/repo" \
             --no-banner \
+            --verbose \
             --report-format sarif \
-            --report-path "/path/security/gitleaks.sarif" || true
+            --report-path "/repo/security/gitleaks.sarif" || true
 
-      - name: Check output file
+      - name: Verify report exists
         run: |
-          echo "Contents of security/:"
-          ls -al security || echo "⚠️ Folder missing!"
+          echo "Files in security/:"
+          ls -l security || echo " No SARIF found!"
+          if [ -f "security/gitleaks.sarif" ]; then
+            echo "Gitleaks report created."
+          else
+            echo " Gitleaks found no leaks."
+          fi
 
       - name: Upload SARIF to GitHub Security tab
         if: always()
@@ -38,7 +44,7 @@ jobs:
         with:
           sarif_file: security/gitleaks.sarif
 
-      - name: Upload Gitleaks artifact
+      - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
