@@ -1,81 +1,51 @@
-name: Dependency Audit - OWASP Dependency-Check (Stable Docker Run)
+name: Dependency Audit - OWASP DC
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ "main", "**" ]
+    branches: ["**"]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   depcheck:
+    name: Run OWASP Dependency-Check
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Lấy code từ repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Cài JDK & build Maven để tải dependency
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Build project with Maven
-        run: mvn -B clean install -DskipTests
-
-      # 3️⃣ Tạo thư mục lưu báo cáo
-      - name: Prepare security folder
-        run: mkdir -p security
-
-      # 4️⃣ Chạy OWASP Dependency-Check bằng Docker
       - name: Run OWASP Dependency-Check via Docker
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
-          echo "🚀 Running OWASP Dependency-Check..."
-          echo "📄 pom.xml located at:"
-          find . -name pom.xml
+          echo "Starting OWASP Dependency-Check scan..."
+          mkdir -p security
 
-          docker run --rm -u root \
+          docker run --rm \
             -e NVD_API_KEY=${{ secrets.NVD_API_KEY }} \
-            -v "$(pwd):/src" \
-            -w /src \
+            -v $PWD:/src \
             owasp/dependency-check:latest \
-            --project "ProjectSCGH" \
-            --scan ./pom.xml \
+            --scan /src \
             --format "HTML,XML" \
             --out /src/security \
             --enableExperimental \
-            --failOnCVSS 7 || true
+            --failOnCVSS 7 \
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
 
-          echo "✅ Scan completed. Reports saved to ./security"
-          echo "📁 Files generated:"
-          ls -lah security || echo "⚠️ No reports generated."
+          echo "Checking for High or Critical CVE..."
+          if grep -q 'CVSSv3_Severity="HIGH"' security/dependency-check-report.xml || grep -q 'CVSSv3_Severity="CRITICAL"' security/dependency-check-report.xml; then
+            echo "::error::High/Critical vulnerabilities found!"
+            exit 1
+          else
+            echo "No high or critical vulnerabilities found."
+          fi
 
-      # 5️⃣ Upload HTML/XML reports lên Artifacts
-      - name: Upload Dependency-Check Reports
+      - name: Upload HTML/XML reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report
-          path: security/
-
-      # 6️⃣ Fail nếu có lỗ hổng nghiêm trọng
-      - name: Fail if high vulnerabilities found
-        if: always()
-        run: |
-          if [ -f security/dependency-check-report.html ]; then
-            HIGH=$(grep -c "HIGH" security/dependency-check-report.html || true)
-            CRITICAL=$(grep -c "CRITICAL" security/dependency-check-report.html || true)
-            echo "🔍 Found $HIGH HIGH and $CRITICAL CRITICAL vulnerabilities."
-            if [ "$HIGH" -gt 0 ] || [ "$CRITICAL" -gt 0 ]; then
-              echo "::error::❌ High/Critical vulnerabilities detected in dependencies."
-              exit 1
-            else
-              echo "✅ No high/critical vulnerabilities found."
-            fi
-          else
-            echo "::warning::⚠️ No report file found."
-          fi
+          path: |
+            security/dependency-check-report.html
+            security/dependency-check-report.xml
