@@ -1,1 +1,40 @@
+name: Dependency Audit - OWASP DC
 
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+
+jobs:
+  depcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: .NET Vulnerable Packages
+        run: |
+          if command -v dotnet >/dev/null 2>&1; then
+            dotnet restore || true
+            dotnet list package --vulnerable || true
+          fi
+      - name: Run OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@v4
+        with:
+          project: "${{ github.repository }}"
+          path: "."
+          format: "HTML,XML"
+          out: "security"
+          args: >
+            --failOnCVSS 7
+            --enableExperimental
+        continue-on-error: true
+
+      # Upload báo cáo
+      - name: Publish HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: |
+            security/dependency-check-report.html
+            security/dependency-check-report.xml
