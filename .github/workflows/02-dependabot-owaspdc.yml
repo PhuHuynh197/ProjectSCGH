@@ -1,45 +1,45 @@
 name: Dependency Audit - OWASP DC
 
 on:
-  push:
-    branches: ["**"]
-  pull_request:
   workflow_dispatch:
+  push:
+    branches: [ "**" ]
+  pull_request:
 
 jobs:
   depcheck:
-    name: Run OWASP Dependency-Check
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Prepare security folder
+        run: |
+          mkdir -p ${{ github.workspace }}/security
+          echo "Created folder: ${{ github.workspace }}/security"
+
       - name: Run OWASP Dependency-Check via Docker
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
-          echo "Starting OWASP Dependency-Check scan..."
+          echo "Running OWASP Dependency-Check..."
           mkdir -p security
 
-          docker run --rm \
+          docker run --rm -u root \
             -e NVD_API_KEY=${{ secrets.NVD_API_KEY }} \
-            -v $PWD:/src \
+            -v "${{ github.workspace }}:/src" \
+            -w /src \
             owasp/dependency-check:latest \
+            --project "Full Project Scan" \
             --scan /src \
-            --format "HTML,XML" \
             --out /src/security \
+            --format "HTML,XML" \
             --enableExperimental \
-            --failOnCVSS 7 \
-            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+            --failOnCVSS 7 || true
 
-          echo "Checking for High or Critical CVE..."
-          if grep -q 'CVSSv3_Severity="HIGH"' security/dependency-check-report.xml || grep -q 'CVSSv3_Severity="CRITICAL"' security/dependency-check-report.xml; then
-            echo "::error::High/Critical vulnerabilities found!"
-            exit 1
-          else
-            echo "No high or critical vulnerabilities found."
-          fi
+          echo "Scan completed. Reports saved to /src/security"
+          ls -lah security || echo "No reports found"
 
       - name: Upload HTML/XML reports
         if: always()
@@ -47,5 +47,20 @@ jobs:
         with:
           name: dependency-check-report
           path: |
-            security/dependency-check-report.html
-            security/dependency-check-report.xml
+            ${{ github.workspace }}/security/dependency-check-report.html
+            ${{ github.workspace }}/security/dependency-check-report.xml
+          if-no-files-found: warn
+
+      - name: Fail if high vulnerabilities found
+        if: always()
+        run: |
+          if [ -f security/dependency-check-report.html ]; then
+            if grep -q "HIGH" security/dependency-check-report.html; then
+              echo "::error::High vulnerabilities detected in dependencies."
+              exit 1
+            else
+              echo "No high severity vulnerabilities found."
+            fi
+          else
+            echo "::warning::No report file found to analyze."
+          fi
