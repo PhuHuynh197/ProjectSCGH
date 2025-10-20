@@ -1,0 +1,4 @@
+# Fake secrets for testing Gitleaks
+GITHUB_TOKEN = "ghp_FAKESECRETEXAMPLE1234567890abcDEF"
+AWS_SECRET_ACCESS_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+password = "SuperSecret123!"
