@@ -2,9 +2,9 @@ name: Gitleaks - Secret Scan
 
 on:
   push:
-    branches: [ "**" ]
+    branches: ["main", "**"]
   pull_request:
-    branches: [ "**" ]
+    branches: ["main", "**"]
   workflow_dispatch:
 
 jobs:
@@ -32,9 +32,9 @@ jobs:
             --report-format sarif \
             --report-path "/repo/security/gitleaks.sarif" || true
 
-      - name: Debug: verify SARIF
+      - name: Debug verify SARIF
         run: |
-          echo "---- Security folder ----"
+          echo "---- files in security/ ----"
           ls -la security || true
           echo "---- SARIF head ----"
           head -n 80 security/gitleaks.sarif || echo "No sarif found"
