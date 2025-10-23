@@ -48,7 +48,6 @@ jobs:
           cmd_options: '-a -T ${{ env.ZAP_TIMEOUT_MINUTES }}'
           fail_action: false
           allow_issue_writing: false
-          artifact_name: zap_dast_results
 
       - name: Normalize ZAP report filenames
         if: always()
@@ -56,15 +55,12 @@ jobs:
           echo "== Normalize ZAP report filenames =="
           ls -la || true
 
-          # Copy các file về tên chuẩn (tùy version của action)
           if [ -f report_html.html ]; then cp -f report_html.html zap_report.html; fi
-          if [ -f report_html.md ]; then cp -f report_html.md zap_report.html; fi
-          if [ -f report_html.md.html ]; then cp -f report_html.md.html zap_report.html; fi
-          if [ -f report_html.txt ]; then cp -f report_html.txt zap_report.html; fi
+          if [ -f report.html ]; then cp -f report.html zap_report.html; fi
           if [ -f report.md ]; then cp -f report.md zap_report.html; fi
-          if [ -f zap_scan_report.html ]; then cp -f zap_scan_report.html zap_report.html; fi
-          if [ -f report_html.json ]; then cp -f report_html.json zap_report.json; fi
           if [ -f report_json.json ]; then cp -f report_json.json zap_report.json; fi
+          if [ -f report_json.html ]; then cp -f report_json.html zap_report.html; fi
+          if [ -f zap_scan_report.html ]; then cp -f zap_scan_report.html zap_report.html; fi
 
           if [ ! -f zap_report.html ]; then
             FOUND_HTML=$(find . -type f -name "*.html" | head -n 1)
@@ -115,7 +111,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zap-dast-report
+          name: zap_dast_report
           path: |
             zap_report.html
             zap_report.json
