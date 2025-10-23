@@ -1,1 +1,60 @@
 
+name: Container & Runtime Security - Trivy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main", "**" ]
+  pull_request:
+
+jobs:
+  trivy-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t projectscgh:latest .
+
+      - name: Prepare security folder
+        run: mkdir -p ${{ github.workspace }}/security
+
+      - name: Run Trivy config scan (Dockerfile)
+        run: |
+          echo "Scanning Dockerfile for misconfigurations..."
+          trivy config --exit-code 0 --severity HIGH,CRITICAL --format table --output ${{ github.workspace }}/security/trivy-dockerfile.txt .
+          trivy config --exit-code 1 --severity HIGH,CRITICAL --format json --output ${{ github.workspace }}/security/trivy-dockerfile.json . || true
+
+      - name: Run Trivy image scan
+        run: |
+          echo "🐳 Scanning built image for vulnerabilities..."
+          trivy image --exit-code 0 --severity HIGH,CRITICAL --format table --output ${{ github.workspace }}/security/trivy-image.txt projectscgh:latest
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format json --output ${{ github.workspace }}/security/trivy-image.json projectscgh:latest || true
+
+      - name: Upload Trivy reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-scan-reports
+          path: |
+            ${{ github.workspace }}/security/trivy-dockerfile.*
+            ${{ github.workspace }}/security/trivy-image.*
+
+      - name: Fail job if severe issues found
+        if: always()
+        run: |
+          if grep -q "CRITICAL" ${{ github.workspace }}/security/trivy-image.txt; then
+            echo "::error::Critical vulnerabilities found in Docker image!"
+            exit 1
+          elif grep -q "HIGH" ${{ github.workspace }}/security/trivy-dockerfile.txt; then
+            echo "::error::High severity misconfigurations found in Dockerfile!"
+            exit 1
+          else
+            echo "No high/critical security issues found."
+          fi
