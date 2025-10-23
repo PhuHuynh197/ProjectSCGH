@@ -33,7 +33,7 @@ jobs:
 
       - name: Run Trivy image scan
         run: |
-          echo "🐳 Scanning built image for vulnerabilities..."
+          echo "Scanning built image for vulnerabilities..."
           trivy image --exit-code 0 --severity HIGH,CRITICAL --format table --output ${{ github.workspace }}/security/trivy-image.txt projectscgh:latest
           trivy image --exit-code 1 --severity HIGH,CRITICAL --format json --output ${{ github.workspace }}/security/trivy-image.json projectscgh:latest || true
 
