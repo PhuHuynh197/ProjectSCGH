@@ -1,4 +1,3 @@
-
 name: Container & Runtime Security - Trivy
 
 on:
@@ -23,38 +22,41 @@ jobs:
           docker build -t projectscgh:latest .
 
       - name: Prepare security folder
-        run: mkdir -p ${{ github.workspace }}/security
+        run: mkdir -p security
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install wget -y
+          wget -qO- https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb stable main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy -y
+          trivy --version
 
       - name: Run Trivy config scan (Dockerfile)
         run: |
           echo "Scanning Dockerfile for misconfigurations..."
-          trivy config --exit-code 0 --severity HIGH,CRITICAL --format table --output ${{ github.workspace }}/security/trivy-dockerfile.txt .
-          trivy config --exit-code 1 --severity HIGH,CRITICAL --format json --output ${{ github.workspace }}/security/trivy-dockerfile.json . || true
+          trivy config --exit-code 1 --severity HIGH,CRITICAL --format table -o security/trivy-dockerfile.txt .
 
       - name: Run Trivy image scan
         run: |
-          echo "Scanning built image for vulnerabilities..."
-          trivy image --exit-code 0 --severity HIGH,CRITICAL --format table --output ${{ github.workspace }}/security/trivy-image.txt projectscgh:latest
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format json --output ${{ github.workspace }}/security/trivy-image.json projectscgh:latest || true
+          echo "Scanning Docker image for vulnerabilities..."
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o security/trivy-image.txt projectscgh:latest || true
 
       - name: Upload Trivy reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-scan-reports
-          path: |
-            ${{ github.workspace }}/security/trivy-dockerfile.*
-            ${{ github.workspace }}/security/trivy-image.*
+          name: trivy-reports
+          path: security/
 
       - name: Fail job if severe issues found
         if: always()
         run: |
-          if grep -q "CRITICAL" ${{ github.workspace }}/security/trivy-image.txt; then
-            echo "::error::Critical vulnerabilities found in Docker image!"
-            exit 1
-          elif grep -q "HIGH" ${{ github.workspace }}/security/trivy-dockerfile.txt; then
-            echo "::error::High severity misconfigurations found in Dockerfile!"
+          if grep -q "CRITICAL" security/trivy-image.txt || grep -q "HIGH" security/trivy-dockerfile.txt; then
+            echo "::error::High or Critical vulnerabilities detected."
             exit 1
           else
-            echo "No high/critical security issues found."
+            echo "No critical issues found."
           fi
