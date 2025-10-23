@@ -25,7 +25,7 @@ jobs:
         run: |
           echo "Starting OWASP Juice Shop (for DAST target)..."
           docker run -d --name juice_shop_demo -p 8080:3000 bkimminich/juice-shop:latest
-          echo "Waiting for Juice Shop to be ready (max 3 minutes)..."
+          echo "Waiting for Juice Shop to be ready..."
           for i in {1..36}; do
             if curl -sSf ${TARGET_URL} >/dev/null 2>&1; then
               echo "Juice Shop is up!"
@@ -41,53 +41,34 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y jq
 
-      - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.12.0
-        with:
-          target: '${{ env.TARGET_URL }}'
-          cmd_options: '-a -T ${{ env.ZAP_TIMEOUT_MINUTES }}'
-          fail_action: false
-          allow_issue_writing: false
-
-      - name: Normalize ZAP report filenames
-        if: always()
+      - name: Run OWASP ZAP Baseline Scan (fixed image)
         run: |
-          echo "== Normalize ZAP report filenames =="
-          ls -la || true
+          echo "Running ZAP baseline scan..."
+          docker run --rm \
+            -v $(pwd):/zap/wrk/:rw \
+            -t ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+            -t ${TARGET_URL} \
+            -a \
+            -r zap_report.html \
+            -J zap_report.json \
+            -T ${ZAP_TIMEOUT_MINUTES}
 
-          # Copy các file về tên chuẩn (tùy version của action)
-          if [ -f report_html.html ]; then cp -f report_html.html zap_report.html; fi
-          if [ -f report.html ]; then cp -f report.html zap_report.html; fi
-          if [ -f report.md ]; then cp -f report.md zap_report.html; fi
-          if [ -f report_json.json ]; then cp -f report_json.json zap_report.json; fi
-          if [ -f report_json.html ]; then cp -f report_json.html zap_report.html; fi
-          if [ -f zap_scan_report.html ]; then cp -f zap_scan_report.html zap_report.html; fi
-
-          if [ ! -f zap_report.html ]; then
-            FOUND_HTML=$(find . -type f -name "*.html" | head -n 1)
-            if [ -n "$FOUND_HTML" ]; then cp "$FOUND_HTML" zap_report.html; fi
-          fi
-          if [ ! -f zap_report.json ]; then
-            FOUND_JSON=$(find . -type f -name "*.json" | head -n 1)
-            if [ -n "$FOUND_JSON" ]; then cp "$FOUND_JSON" zap_report.json; fi
-          fi
-
-          echo "== After normalize =="
-          ls -la
+      - name: Show reports generated
+        run: |
+          echo "Generated files:"
+          ls -la zap_report.* || echo "No report files found."
 
       - name: Evaluate ZAP report (fail on thresholds)
         if: always()
         run: |
           set -euo pipefail
           JSON="zap_report.json"
-          HTML="zap_report.html"
-
           if [ ! -f "$JSON" ]; then
-            echo "JSON report not found, skipping alert evaluation."
+            echo "JSON report not found. Skipping evaluation."
             exit 0
           fi
 
-          echo "Counting alerts from $JSON ..."
           HIGH_COUNT=$(jq '[.site[]?.alerts[]? | select(.risk=="High")] | length' "$JSON")
           MEDIUM_COUNT=$(jq '[.site[]?.alerts[]? | select(.risk=="Medium")] | length' "$JSON")
           LOW_COUNT=$(jq '[.site[]?.alerts[]? | select(.risk=="Low")] | length' "$JSON")
@@ -100,7 +81,6 @@ jobs:
             echo "::error::Found $HIGH_COUNT HIGH alerts — failing job."
             exit 3
           fi
-
           if [ "$MEDIUM_COUNT" -ge "${MEDIUM_THRESHOLD}" ]; then
             echo "::error::Found $MEDIUM_COUNT MEDIUM alerts (threshold=${MEDIUM_THRESHOLD}) — failing job."
             exit 4
@@ -120,6 +100,5 @@ jobs:
       - name: Cleanup Docker
         if: always()
         run: |
-          docker ps -a
           docker stop juice_shop_demo || true
           docker rm juice_shop_demo || true
