@@ -25,16 +25,19 @@ jobs:
 
       - name: Run Spring Boot app
         run: |
+          echo "Starting Spring Boot app..."
           nohup mvn spring-boot:run > app.log 2>&1 &
-          echo "Waiting for app to start..."
-          for i in {1..20}; do
+          echo "Waiting for app to start (max 3 minutes)..."
+          for i in {1..36}; do
             if curl -s http://localhost:8080 >/dev/null; then
-              echo "App is up!"
+              echo "App is up and responding!"
               break
             fi
-            echo "Still waiting... ($i/20)"
+            echo "Still waiting... ($i/36)"
             sleep 5
           done
+          echo "------ App logs (last 20 lines) ------"
+          tail -n 20 app.log
 
       - name: Run OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
