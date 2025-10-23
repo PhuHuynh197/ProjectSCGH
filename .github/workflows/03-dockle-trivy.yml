@@ -27,10 +27,11 @@ jobs:
       - name: Install Trivy
         run: |
           echo "Installing Trivy from GitHub release..."
-          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.54.1_Linux-64bit.deb
-          sudo dpkg -i trivy_0.54.1_Linux-64bit.deb
+          TRIVY_VERSION=0.55.0
+          wget https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.deb
+          sudo dpkg -i trivy_${TRIVY_VERSION}_Linux-64bit.deb
           trivy --version
-
+    
       - name: Run Trivy config scan (Dockerfile)
         run: |
           echo "Scanning Dockerfile for misconfigurations..."
