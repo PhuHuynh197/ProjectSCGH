@@ -48,6 +48,7 @@ jobs:
           cmd_options: '-a -T ${{ env.ZAP_TIMEOUT_MINUTES }}'
           fail_action: false
           allow_issue_writing: false
+          artifact_name: zap_dast_results
 
       - name: Normalize ZAP report filenames
         if: always()
