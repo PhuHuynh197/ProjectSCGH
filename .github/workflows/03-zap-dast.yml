@@ -9,8 +9,9 @@ on:
 env:
   TARGET_URL: http://localhost:8080
   ZAP_TIMEOUT_MINUTES: 20
-  MEDIUM_THRESHOLD: 3    
-  FAIL_ON_HIGH: "true"   
+  MEDIUM_THRESHOLD: 3
+  FAIL_ON_HIGH: "true"
+
 jobs:
   zap-dast-scan:
     runs-on: ubuntu-latest
@@ -33,7 +34,6 @@ jobs:
             echo "Waiting... ($i/36)"
             sleep 5
           done
-          # print a short check
           curl -I --max-time 5 ${TARGET_URL} || true
 
       - name: Install jq
@@ -45,41 +45,35 @@ jobs:
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: '${{ env.TARGET_URL }}'
-          cmd_options: "-a -T ${{ env.ZAP_TIMEOUT_MINUTES }}"
-          fail_action: false            
+          cmd_options: '-a -T ${{ env.ZAP_TIMEOUT_MINUTES }}'
+          fail_action: false
           allow_issue_writing: false
 
-      - name: List generated files
-        run: |
-          echo "Workspace files:"
-          ls -la
-          echo "Report JSON exists?"; test -f report.json && echo "report.json exists" || echo "report.json missing"
-          echo "Report HTML exists?"; test -f report.html && echo "report.html exists" || echo "report.html missing"
-          # Some versions write different filenames; normalize copy if necessary
-          if [ -f report.json ]; then cp report.json zap_report.json; fi
-          if [ -f report.html ]; then cp report.html zap_report.html; fi
-          # Some older action names: report_md.html / report.md => attempt safe copies
-          test -f zap_report.json && echo "zap_report.json ready" || echo "zap_report.json missing"
-
-      - name: Normalize ZAP output filenames
+      - name: Normalize ZAP report filenames
         if: always()
         run: |
           echo "== Normalize ZAP report filenames =="
           ls -la || true
-          # Copy về tên chuẩn nếu tồn tại các biến thể
+
+          # Copy các file về tên chuẩn (tùy version của action)
           if [ -f report_html.html ]; then cp -f report_html.html zap_report.html; fi
-          if [ -f report_json.json ]; then cp -f report_json.json zap_report.json; fi
-          if [ -f zap_scan_report.html ]; then cp -f zap_scan_report.html zap_report.html; fi
+          if [ -f report_html.md ]; then cp -f report_html.md zap_report.html; fi
+          if [ -f report_html.md.html ]; then cp -f report_html.md.html zap_report.html; fi
+          if [ -f report_html.txt ]; then cp -f report_html.txt zap_report.html; fi
           if [ -f report.md ]; then cp -f report.md zap_report.html; fi
-          # Một số bản viết ra thư mục con . (phòng xa)
+          if [ -f zap_scan_report.html ]; then cp -f zap_scan_report.html zap_report.html; fi
+          if [ -f report_html.json ]; then cp -f report_html.json zap_report.json; fi
+          if [ -f report_json.json ]; then cp -f report_json.json zap_report.json; fi
+
           if [ ! -f zap_report.html ]; then
-            HTML_CAND=$(find . -maxdepth 2 -type f \( -name "report_html.html" -o -name "zap_scan_report.html" -o -name "report.md" \) | head -n 1)
-            if [ -n "$HTML_CAND" ]; then cp -f "$HTML_CAND" zap_report.html; fi
+            FOUND_HTML=$(find . -type f -name "*.html" | head -n 1)
+            if [ -n "$FOUND_HTML" ]; then cp "$FOUND_HTML" zap_report.html; fi
           fi
           if [ ! -f zap_report.json ]; then
-            JSON_CAND=$(find . -maxdepth 2 -type f -name "report_json.json" | head -n 1)
-            if [ -n "$JSON_CAND" ]; then cp -f "$JSON_CAND" zap_report.json; fi
+            FOUND_JSON=$(find . -type f -name "*.json" | head -n 1)
+            if [ -n "$FOUND_JSON" ]; then cp "$FOUND_JSON" zap_report.json; fi
           fi
+
           echo "== After normalize =="
           ls -la
 
@@ -87,23 +81,34 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
-          if [ ! -f zap_report.json ]; then
-            echo "No JSON report found; skipping threshold checks."
+          JSON="zap_report.json"
+          HTML="zap_report.html"
+
+          if [ ! -f "$JSON" ]; then
+            echo "JSON report not found, skipping alert evaluation."
             exit 0
           fi
-          HIGH=$(jq '[.site[]?.alerts[]? | select(.risk=="High")] | length' zap_report.json)
-          MED=$(jq '[.site[]?.alerts[]? | select(.risk=="Medium")] | length' zap_report.json)
-          LOW=$(jq '[.site[]?.alerts[]? | select(.risk=="Low")] | length' zap_report.json)
-          echo "High: $HIGH | Medium: $MED | Low: $LOW"
-          if [ "$HIGH" -gt 0 ]; then
-            echo "::error::Found $HIGH HIGH alerts — failing."
+
+          echo "Counting alerts from $JSON ..."
+          HIGH_COUNT=$(jq '[.site[]?.alerts[]? | select(.risk=="High")] | length' "$JSON")
+          MEDIUM_COUNT=$(jq '[.site[]?.alerts[]? | select(.risk=="Medium")] | length' "$JSON")
+          LOW_COUNT=$(jq '[.site[]?.alerts[]? | select(.risk=="Low")] | length' "$JSON")
+
+          echo "High alerts: $HIGH_COUNT"
+          echo "Medium alerts: $MEDIUM_COUNT"
+          echo "Low alerts: $LOW_COUNT"
+
+          if [ "${FAIL_ON_HIGH}" = "true" ] && [ "$HIGH_COUNT" -gt 0 ]; then
+            echo "::error::Found $HIGH_COUNT HIGH alerts — failing job."
             exit 3
           fi
-          if [ "$MED" -ge 3 ]; then
-            echo "::error::Found $MED MEDIUM alerts (>=3) — failing."
+
+          if [ "$MEDIUM_COUNT" -ge "${MEDIUM_THRESHOLD}" ]; then
+            echo "::error::Found $MEDIUM_COUNT MEDIUM alerts (threshold=${MEDIUM_THRESHOLD}) — failing job."
             exit 4
           fi
-          echo "Alert counts within thresholds."
+
+          echo "ZAP alert counts within threshold."
 
       - name: Upload ZAP reports
         if: always()
