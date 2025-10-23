@@ -26,12 +26,9 @@ jobs:
 
       - name: Install Trivy
         run: |
-          sudo apt-get update -y
-          sudo apt-get install wget -y
-          wget -qO- https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
-          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb stable main" | sudo tee /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install trivy -y
+          echo "Installing Trivy from GitHub release..."
+          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.54.1_Linux-64bit.deb
+          sudo dpkg -i trivy_0.54.1_Linux-64bit.deb
           trivy --version
 
       - name: Run Trivy config scan (Dockerfile)
