@@ -7,7 +7,7 @@ on:
   pull_request:
 
 env:
-  TARGET_URL: http://localhost:8080
+  TARGET_URL: http://host.docker.internal:8080
   ZAP_TIMEOUT_MINUTES: 20
   MEDIUM_THRESHOLD: 3
   FAIL_ON_HIGH: "true"
@@ -27,24 +27,24 @@ jobs:
           docker run -d --name juice_shop_demo -p 8080:3000 bkimminich/juice-shop:latest
           echo "Waiting for Juice Shop to be ready..."
           for i in {1..36}; do
-            if curl -sSf ${TARGET_URL} >/dev/null 2>&1; then
+            if curl -sSf http://localhost:8080 >/dev/null 2>&1; then
               echo "Juice Shop is up!"
               break
             fi
             echo "Waiting... ($i/36)"
             sleep 5
           done
-          curl -I --max-time 5 ${TARGET_URL} || true
+          curl -I --max-time 5 http://localhost:8080 || true
 
       - name: Install jq
         run: |
           sudo apt-get update -y
           sudo apt-get install -y jq
 
-      - name: Run OWASP ZAP Baseline Scan (fixed image)
+      - name: Run OWASP ZAP Baseline Scan (host network fix)
         run: |
           echo "Running ZAP baseline scan..."
-          docker run --rm \
+          docker run --rm --network="host" \
             -v $(pwd):/zap/wrk/:rw \
             -t ghcr.io/zaproxy/zaproxy:stable \
             zap-baseline.py \
