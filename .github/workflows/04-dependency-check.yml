@@ -1,0 +1,53 @@
+name: Dependency Audit - OWASP Dependency-Check
+
+on:
+  push:
+    branches: ["main", "**"]
+  pull_request:
+    branches: ["main", "**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  dependency-check:
+    name: Run OWASP Dependency-Check (SCA)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Create security folder
+        run: mkdir -p security
+
+      - name: Run OWASP Dependency-Check via Docker
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          echo "=== Running OWASP Dependency-Check ==="
+          docker run --rm \
+            -e NVD_API_KEY=${{ secrets.NVD_API_KEY }} \
+            -v $PWD:/src \
+            owasp/dependency-check:latest \
+            --scan /src \
+            --out /src/security \
+            --format "HTML,JSON,SARIF" \
+            --enableExperimental \
+            --failOnCVSS 7 \
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+
+      - name: Upload HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: security
+
+      - name: Upload SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: security/dependency-check-report.sarif
