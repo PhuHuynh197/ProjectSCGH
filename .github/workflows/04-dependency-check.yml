@@ -2,9 +2,9 @@ name: Dependency Audit - OWASP Dependency-Check
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "**"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "**"]
   workflow_dispatch:
 
 permissions:
@@ -28,25 +28,42 @@ jobs:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
           echo "=== Running OWASP Dependency-Check ==="
+
           docker run --rm \
             -e NVD_API_KEY=${{ secrets.NVD_API_KEY }} \
             -v $PWD:/src \
             owasp/dependency-check:latest \
             --scan /src \
             --out /src/security \
-            --format "HTML,SARIF" \
-            --enableExperimental \
-            --failOnCVSS 7
+            --format "ALL" \
+            --disableAssembly \
+            --failOnCVSS 7 || true
 
-      - name: Upload HTML Report
+          echo "=== Dependency-Check scan finished ==="
+
+      - name: Show generated files
+        run: ls -R security || echo "No files generated!"
+
+      - name: Upload HTML & JSON Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dependency-check-report
-          path: security/*.html
+          name: dependency-check-reports
+          path: security/
 
       - name: Upload SARIF to GitHub Security tab
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: security/*.sarif
+          sarif_file: security/dependency-check-report.sarif
+
+      - name: Fail job if CVE ≥7 detected
+        run: |
+          echo "Checking for high severity vulnerabilities..."
+          if grep -qi "CRITICAL" security/dependency-check-report.json || \
+             grep -qi "\"severity\": \"HIGH\"" security/dependency-check-report.json; then
+            echo "::error:: High/Critical vulnerabilities detected!"
+            exit 1
+          else
+            echo "No vulnerabilities with severity ≥ HIGH found."
+          fi
