@@ -13,27 +13,36 @@ permissions:
 
 jobs:
   dependency-check:
-    name: OWASP Dependency-Check (SCA)
+    name: Run OWASP Dependency-Check (SCA)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Run OWASP Dependency-Check
-        uses: dependency-check/Dependency-Check_Action@v3.0.2
-        with:
-          project: "ProjectSCGH"
-          path: "."
-          format: "HTML,SARIF"
-          out: "security"
-          args: "--failOnCVSS 7"
+      - name: Create security folder
+        run: mkdir -p security
+
+      - name: Run OWASP Dependency-Check via Docker
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          echo "=== Running OWASP Dependency-Check ==="
+          docker run --rm \
+            -e NVD_API_KEY=${{ secrets.NVD_API_KEY }} \
+            -v $PWD:/src \
+            owasp/dependency-check:latest \
+            --scan /src \
+            --out /src/security \
+            --format "HTML,SARIF" \
+            --enableExperimental \
+            --failOnCVSS 7
 
       - name: Upload HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dependency-check-html
+          name: dependency-check-report
           path: security/*.html
 
       - name: Upload SARIF to GitHub Security tab
