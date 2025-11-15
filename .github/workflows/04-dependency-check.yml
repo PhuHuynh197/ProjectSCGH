@@ -9,35 +9,35 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   dependency-check:
-    name: Run OWASP Dependency-Check (SCA)
+    name: OWASP Dependency-Check (SCA)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Create security folder
-        run: mkdir -p security
-
-      - name: Run OWASP Dependency-Check 
-        run: |
-          echo "=== Running OWASP Dependency-Check (no update) ==="
-          docker run --rm \
-            -v "$PWD:/src" \
-            owasp/dependency-check:latest \
-            --scan "/src" \
-            --out "/src/security" \
-            --format "HTML" \
-            --enableExperimental \
-            --failOnCVSS 7 \
-            --noupdate
+      - name: Run OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@v3.1.0
+        with:
+          project: "ProjectSCGH"
+          path: "."
+          format: "HTML,SARIF"
+          out: "security"
+          args: "--failOnCVSS 7"
 
       - name: Upload HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dependency-check-report
+          name: dependency-check-html
           path: security/*.html
+
+      - name: Upload SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: security/*.sarif
