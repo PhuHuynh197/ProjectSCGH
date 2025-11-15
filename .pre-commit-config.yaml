@@ -1,9 +1,10 @@
 repos:
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.0 
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.18.0
     hooks:
       - id: gitleaks
-        name: Run Gitleaks pre-commit secret scan
-        entry: gitleaks detect --source . --no-git --verbose --redact
-        language: golang
-        pass_filenames: false
+        args: ["detect", "--no-git", "--redact"]
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets-hook
