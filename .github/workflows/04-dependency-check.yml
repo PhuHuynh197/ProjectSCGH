@@ -38,7 +38,7 @@ jobs:
             -f JSON \
             --nvdApiKey "${NVD_API_KEY}" \
             --disableAssembly \
-            --failOnCVSS 7 || true
+            --failOnCVSS 0 || true
 
           echo "=== Dependency-Check scan finished ==="
 
