@@ -35,15 +35,14 @@ jobs:
             owasp/dependency-check:latest \
             --scan /src \
             --out /src/security \
-            --format "HTML,JSON,SARIF" \
+            --format "ALL" \
+            --project "ProjectSCGH" \
             --nvdApiKey "${NVD_API_KEY}" \
             --disableAssembly \
-            --failOnCVSS 7 || true
-
-          echo "=== Dependency-Check scan finished ==="
+            --enableRetired || true
 
       - name: Show generated files
-        run: ls -R security || echo "No files generated!"
+        run: ls -lah security || echo "No files generated!"
 
       - name: Upload HTML & JSON Reports
         if: always()
@@ -56,7 +55,7 @@ jobs:
         if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: security/dependency-check-report.sarif
+          sarif_file: security/dependency-check-report.sarif.json
 
       - name: Fail job if CVE ≥7 detected
         run: |
@@ -66,5 +65,5 @@ jobs:
             echo "::error:: High/Critical vulnerabilities detected!"
             exit 1
           else
-            echo "No vulnerabilities with severity ≥ HIGH found."
+            echo "No HIGH/CRITICAL vulnerabilities found."
           fi
