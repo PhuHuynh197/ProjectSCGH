@@ -1,0 +1,27 @@
+name: Dockerfile Lint - Hadolint
+
+on:
+  push:
+    branches: ["main", "**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  hadolint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Hadolint (lint Dockerfile)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+      - name: Upload Hadolint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hadolint-report
+          path: hadolint*.txt
