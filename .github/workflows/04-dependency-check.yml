@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  security-events: write
 
 jobs:
   dependency-check:
@@ -35,7 +34,7 @@ jobs:
             owasp/dependency-check:latest \
             --scan /src \
             --out /src/security \
-            --format "HTML,JSON,SARIF" \
+            --format "HTML,JSON" \
             --nvdApiKey "${NVD_API_KEY}" \
             --disableAssembly \
             --failOnCVSS 7 || true
@@ -51,12 +50,6 @@ jobs:
         with:
           name: dependency-check-reports
           path: security/
-
-      - name: Upload SARIF to GitHub Security tab
-        if: always()
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: security/dependency-check-report.sarif.json
 
       - name: Fail job if CVE ≥7 detected
         run: |
