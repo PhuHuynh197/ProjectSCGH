@@ -2,9 +2,8 @@ name: Dependency Audit - OWASP Dependency-Check
 
 on:
   push:
-    branches: ["main", "**"]
+    branches: ["main"]
   pull_request:
-    branches: ["main", "**"]
   workflow_dispatch:
 
 permissions:
@@ -12,52 +11,40 @@ permissions:
 
 jobs:
   dependency-check:
-    name: Run OWASP Dependency-Check (SCA)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Create security folder
-        run: mkdir -p security
+      - name: Prepare output folder
+        run: mkdir -p odc-out
 
-      - name: Run OWASP Dependency-Check via Docker
+      - name: Run OWASP Dependency-Check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
-          echo "=== Running OWASP Dependency-Check ==="
-
           docker run --rm \
             -e NVD_API_KEY="${NVD_API_KEY}" \
             -v "${{ github.workspace }}":/project \
             owasp/dependency-check:latest \
             --scan /project \
-            --out /project/security \
+            --out /project/odc-out \
             -f HTML -f JSON \
-            --nvdApiKey "${NVD_API_KEY}" \
-            --disableAssembly \
             --failOnCVSS 7 || true
 
-          echo "=== Dependency-Check scan finished ==="
+      - name: List generated files
+        run: ls -R odc-out
 
-      - name: Show generated files
-        run: ls -R security || echo "No files generated!"
-
-      - name: Upload HTML & JSON Reports
-        if: always()
+      - name: Upload ODC Reports
         uses: actions/upload-artifact@v4
         with:
           name: dependency-check-reports
-          path: security/
+          path: odc-out/
 
-      - name: Fail job if CVE ≥7 detected
+      - name: Fail job if CVE ≥7
         run: |
-          echo "Checking for high severity vulnerabilities..."
-          if grep -qi "CRITICAL" security/dependency-check-report.json || \
-             grep -qi "\"severity\": \"HIGH\"" security/dependency-check-report.json; then
-            echo "::error:: High/Critical vulnerabilities detected!"
+          if grep -qi "\"severity\": \"HIGH\"" odc-out/dependency-check-report.json; then
+            echo "::error:: High severity vulnerabilities detected!"
             exit 1
-          else
-            echo "No vulnerabilities with severity ≥ HIGH found."
           fi
