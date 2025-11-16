@@ -1,4 +1,4 @@
-name: Dependency Audit - OWASP Dependency-Check
+name: Dependency Audit - OWASP Dependency-Check 
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  security-events: write
 
 jobs:
   dependency-check:
@@ -16,57 +17,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create security folder
+      - name: Create output folder
         run: mkdir -p security
 
-      - name: Run OWASP Dependency-Check via Docker
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        run: |
-          echo "=== Running OWASP Dependency-Check ==="
-
-          docker run --rm \
-            -e NVD_API_KEY="${NVD_API_KEY}" \
-            -v "${{ github.workspace }}":/project \
-            owasp/dependency-check:latest \
-            --scan /project \
-            --out /project/security \
-            -f HTML \
-            -f JSON \
-            --nvdApiKey "${NVD_API_KEY}" \
-            --disableAssembly \
-            --failOnCVSS 0 || true
-
-          echo "=== Dependency-Check scan finished ==="
+      - name: Run Dependency-Check (Marketplace Action)
+        uses: dependency-check/Dependency-Check_Action@v3.2.1
+        with:
+          project: "ProjectSCGH"
+          path: "."               
+          format: "HTML,JSON"     
+          out: "security"         
+          args: >
+            --enableExperimental
+            --failOnCVSS 0
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
 
       - name: Show generated files
-        run: ls -R security || echo "No files generated!"
+        run: ls -lah security || echo "No report generated"
 
-      - name: Upload HTML & JSON Reports
-        if: always()
+      - name: Upload Dependency-Check Reports
         uses: actions/upload-artifact@v4
         with:
-          name: dependency-check-reports
+          name: dependency-check-report
           path: security/
 
-      - name: Fail job if CVE ≥7 detected
+      - name: Fail job if vulnerabilities >= HIGH
         run: |
-          echo "Checking for high severity vulnerabilities..."
-          
           JSON="security/dependency-check-report.json"
 
           if [ ! -f "$JSON" ]; then
-            echo "::error:: Report not found! Dependency-Check failed to generate JSON."
+            echo "::error:: No JSON report found. Dependency-Check may have failed."
             exit 1
           fi
 
-          if grep -qi "\"severity\": \"CRITICAL\"" "$JSON" || \
-             grep -qi "\"severity\": \"HIGH\"" "$JSON"; then
+          HIGH_COUNT=$(jq '.dependencies[].vulnerabilities[]? | select(.severity=="High" or .severity=="Critical")' "$JSON" | wc -l)
+
+          echo "High/Critical vulnerabilities found: $HIGH_COUNT"
+
+          if [ "$HIGH_COUNT" -gt 0 ]; then
             echo "::error:: High/Critical vulnerabilities detected!"
             exit 1
           else
-            echo "No vulnerabilities with severity ≥ HIGH found."
+            echo "No High/Critical vulnerabilities detected."
           fi
