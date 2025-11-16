@@ -35,14 +35,15 @@ jobs:
             owasp/dependency-check:latest \
             --scan /src \
             --out /src/security \
-            --format "ALL" \
-            --project "ProjectSCGH" \
+            --format "HTML,JSON,SARIF" \
             --nvdApiKey "${NVD_API_KEY}" \
             --disableAssembly \
-            --enableRetired || true
+            --failOnCVSS 7 || true
+
+          echo "=== Dependency-Check scan finished ==="
 
       - name: Show generated files
-        run: ls -lah security || echo "No files generated!"
+        run: ls -R security || echo "No files generated!"
 
       - name: Upload HTML & JSON Reports
         if: always()
@@ -65,5 +66,5 @@ jobs:
             echo "::error:: High/Critical vulnerabilities detected!"
             exit 1
           else
-            echo "No HIGH/CRITICAL vulnerabilities found."
+            echo "No vulnerabilities with severity ≥ HIGH found."
           fi
