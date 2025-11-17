@@ -42,7 +42,7 @@ jobs:
           sudo apt-get install -y jq
 
       - name: Run OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.12.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: '${{ env.TARGET_URL }}'
           cmd_options: '-a -T ${{ env.ZAP_TIMEOUT_MINUTES }}'
