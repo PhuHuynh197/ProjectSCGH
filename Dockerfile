@@ -1,31 +1,34 @@
-# INTENTIONALLY BAD Dockerfile (for testing security scanners)
+# INTENTIONALLY BAD DOCKERFILE
+# For security scanning demonstration (Trivy, Dockle)
+
 FROM debian:bullseye
 
 LABEL maintainer="root@example.com"
 
-# 1) install many packages as root (including sshd & sudo) -> increases attack surface
+# Install many unnecessary packages including sshd + sudo
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      curl wget ca-certificates openssh-server sudo gnupg apt-transport-https \
-    && rm -rf /var/lib/apt/lists/*
+      curl wget ca-certificates openssh-server sudo gnupg apt-transport-https && \
+    rm -rf /var/lib/apt/lists/*
 
-# 2) create a "developer" user but we continue to run as root later anyway
+# Create user but still run as root
 RUN useradd -m -s /bin/bash developer && \
     echo "developer:Password123!" | chpasswd && \
     usermod -aG sudo developer
 
-# 3) copy entire repo (may include secrets if present)
 WORKDIR /app
+
+# Copy whole repo (may contain secrets)
 COPY . /app
 
-# 4) create a bad secret file in image (simulate leaked secret)
+# Store secrets inside image (intentionally insecure)
 RUN printf "DB_PASSWORD=super-secret-password\nAPI_KEY=ak_test_1234" > /app/.env
 
-# 5) expose SSH port and app port - leaving SSH running as root
+# Expose SSH port
 EXPOSE 22 8080
 
-# 6) DON'T switch to non-root user (image will run as root)
+# Continue running as root
 USER root
 
-# 7) no HEALTHCHECK, no read-only filesystem, starts sshd (dangerous)
+# No healthcheck, start sshd
 CMD ["/usr/sbin/sshd", "-D"]
