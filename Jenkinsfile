@@ -1,4 +1,4 @@
-ipeline {
+pipeline {
     // 1. Cấu hình Agent sử dụng Docker
     // Lệnh này khởi chạy một container 'docker:latest' để chạy toàn bộ Pipeline.
     agent {
