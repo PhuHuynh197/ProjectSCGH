@@ -12,7 +12,7 @@ pipeline {
     
     // Các biến môi trường cần thiết, ví dụ: định nghĩa tên image
     environment {
-        DOCKER_IMAGE_NAME = 'projectscgh:latest'
+        GITHUB_CREDENTIALS_ID = 'github-ci-cd-token'
     }
 
     stages {
