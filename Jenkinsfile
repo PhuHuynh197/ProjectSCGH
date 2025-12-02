@@ -69,7 +69,11 @@ pipeline {
         stage("Trivy - Image Scan") {
             steps {
                 bat '''
-                docker run --rm -v "//var/run/docker.sock:/var/run/docker.sock" ^
+                if not exist security mkdir security
+        
+                docker run --rm ^
+                  -e DOCKER_HOST=%DOCKER_HOST% ^
+                  -v "%cd%:/workdir" ^
                   aquasec/trivy:latest image %IMAGE_NAME%:%IMAGE_TAG% ^
                   --severity HIGH,CRITICAL ^
                   --format json ^
@@ -82,7 +86,8 @@ pipeline {
         stage("Grype - Image Scan") {
             steps {
                 bat '''
-                docker run --rm -v "//var/run/docker.sock:/var/run/docker.sock" ^
+                docker run --rm ^
+                  -e DOCKER_HOST=%DOCKER_HOST% ^
                   anchore/grype:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   -o json > security/grype.json || exit 0
                 '''
@@ -93,12 +98,14 @@ pipeline {
         stage("Dockle - Best Practice") {
             steps {
                 bat '''
-                docker run --rm -v "//var/run/docker.sock:/var/run/docker.sock" ^
+                docker run --rm ^
+                  -e DOCKER_HOST=%DOCKER_HOST% ^
                   goodwithtech/dockle:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   --format json > security/dockle.json || exit 0
                 '''
             }
         }
+
         // 8. ARCHIVE ARTIFACT
         stage("Publish Security Artifacts") {
             steps {
@@ -110,8 +117,13 @@ pipeline {
         stage("Fail On Critical Vulns") {
             steps {
                 bat '''
-                findstr /S /I "CRITICAL" security\\* > nul
-                if %errorlevel%==0 (
+                set found=0
+        
+                if exist security\\trivy-image.json findstr /I "CRITICAL" security\\trivy-image.json > nul && set found=1
+                if exist security\\grype.json       findstr /I "CRITICAL" security\\grype.json > nul && set found=1
+                if exist security\\dockle.json      findstr /I "CRITICAL" security\\dockle.json > nul && set found=1
+        
+                if %found%==1 (
                     echo CRITICAL vulnerabilities found!
                     exit /b 1
                 ) else (
@@ -120,7 +132,7 @@ pipeline {
                 '''
             }
         }
-    }
+
 
     post {
         always {
