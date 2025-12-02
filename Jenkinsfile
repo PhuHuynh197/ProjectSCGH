@@ -1,80 +1,144 @@
 pipeline {
-    // 1. Cấu hình Agent sử dụng Docker
-    // Lệnh này khởi chạy một container 'docker:latest' để chạy toàn bộ Pipeline.
-    agent {
-        docker {
-            image 'docker:latest'
-            // Option này cho phép container vừa tạo kết nối với Docker daemon của máy chủ (Host)
-            // để nó có thể chạy các lệnh Docker (như build, run)
-            args '-v /var/run/docker.sock:/var/run/docker.sock' 
-        }
-    }
-    
-    // Các biến môi trường cần thiết, ví dụ: định nghĩa tên image
+    agent any
+
     environment {
-        GITHUB_CREDENTIALS_ID = 'github-ci-cd-token'
+        IMAGE_NAME = "projectscgh-devsecops"
+        IMAGE_TAG  = "latest"
+        REPORT_DIR = "security"
+    }
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
     }
 
     stages {
-        // Stage 1: Kiểm tra mã nguồn (Tự động bởi Jenkins)
-        stage('Checkout Code') {
+
+        stage("Checkout Source") {
             steps {
-                // Lệnh này đã được đơn giản hóa vì Jenkins tự động lấy mã nguồn
-                echo 'Source code checked out by Jenkins SCM configuration.'
+                cleanWs()
+                checkout scm
+                sh "mkdir -p ${REPORT_DIR}"
+            }
+        }
+        // 1. HADOLINT
+        stage("Hadolint - Dockerfile Lint") {
+            steps {
+                sh '''
+                docker run --rm -i hadolint/hadolint < Dockerfile \
+                  > ${REPORT_DIR}/hadolint.txt || true
+                '''
+            }
+        }
+        // 2. BUILD IMAGE
+        stage("Build Docker Image") {
+            steps {
+                sh '''
+                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                '''
+            }
+        }
+        // 3. GITLEAKS
+        stage("Gitleaks - Secret Scan") {
+            steps {
+                sh '''
+                docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest detect \
+                  --source="/repo" \
+                  --report-format json \
+                  --report-path="/repo/${REPORT_DIR}/gitleaks.json" \
+                  --no-banner || true
+                '''
+            }
+        }
+        // 4. TRIVY - CONFIG (Dockerfile)
+        stage("Trivy - Config Scan") {
+            steps {
+                sh '''
+                docker run --rm \
+                  -v "$PWD:/workdir" \
+                  aquasec/trivy:latest config /workdir \
+                  --format json \
+                  --output /workdir/${REPORT_DIR}/trivy-config.json || true
+                '''
+            }
+        }
+        // 5. TRIVY - IMAGE
+        stage("Trivy - Image Scan") {
+            steps {
+                sh '''
+                docker run --rm \
+                  -v /var/run/docker.sock:/var/run/docker.sock \
+                  aquasec/trivy:latest image ${IMAGE_NAME}:${IMAGE_TAG} \
+                  --severity HIGH,CRITICAL \
+                  --format json \
+                  --output /workdir/${REPORT_DIR}/trivy-image.json || true
+                '''
+            }
+        }
+        // 6. GRYPE
+        stage("Grype - Image Scan") {
+            steps {
+                sh '''
+                docker run --rm \
+                  -v /var/run/docker.sock:/var/run/docker.sock \
+                  anchore/grype:${IMAGE_TAG} ${IMAGE_NAME}:${IMAGE_TAG} \
+                  -o json > ${REPORT_DIR}/grype.json || true
+                '''
+            }
+        }
+        // 7. DOCKLE
+        stage("Dockle - Best Practice") {
+            steps {
+                sh '''
+                docker run --rm \
+                  -v /var/run/docker.sock:/var/run/docker.sock \
+                  goodwithtech/dockle:latest ${IMAGE_NAME}:${IMAGE_TAG} \
+                  --format json > ${REPORT_DIR}/dockle.json || true
+                '''
             }
         }
 
-        // Stage 2: Build Project (Giả định là Java/Maven, Node/npm, hoặc chỉ đơn giản là in ra)
-        stage('Build') {
+        // 8. GENERATE REPORT
+        stage("Generate Security Report") {
             steps {
-                echo "Building project..."
-                // Thay thế bằng lệnh build thực tế của dự án của bạn (ví dụ: 'mvn clean package')
+                sh '''
+                chmod +x generate-security-report.sh
+                ./generate-security-report.sh
+                '''
             }
         }
-
-        // Stage 3: Quét thành phần bảo mật (SCA) bằng Grype
-        // Grype cần mã nguồn để quét, và nó được chạy bên trong Agent Docker đã cấu hình
-        stage('Security Scan CI (Grype)') {
+        // 9. ARCHIVE ARTIFACT
+        stage("Publish Security Artifacts") {
             steps {
-                echo "Running SCA scan with Grype"
-                // Grype được giả định đã được cài sẵn hoặc sử dụng container Grype
-                sh 'grype . -o table || true' 
+                archiveArtifacts artifacts: "security/**", fingerprint: true
             }
         }
-
-        // Stage 4: Build Container Docker
-        // Lệnh 'docker build' sẽ hoạt động nhờ cấu hình agent DinD ở trên
-        stage('Container Build') {
+        // 10. FAIL IF CRITICAL
+        stage("Fail On Critical Vulns") {
             steps {
-                echo "Building Docker image ${env.DOCKER_IMAGE_NAME}"
-                sh "docker build -t ${env.DOCKER_IMAGE_NAME} ."
-            }
-        }
-
-        // Stage 5: Quét bảo mật Container bằng Trivy và Dockle
-        stage('Container Security Scan (Trivy + Dockle)') {
-            steps {
-                echo "Running Trivy scan for vulnerabilities..."
-                // Trivy cần quyền truy cập vào Docker Daemon để kéo image, đã có sẵn nhờ DinD
-                sh "trivy image --severity HIGH,CRITICAL ${env.DOCKER_IMAGE_NAME} || true"
-
-                echo "Running Dockle scan for best practices..."
-                // Dockle cũng cần tương tác với Docker image
-                sh "dockle ${env.DOCKER_IMAGE_NAME} || true"
+                sh '''
+                if grep -R "CRITICAL" security/; then
+                  echo "CRITICAL vulnerabilities found!"
+                  exit 1
+                else
+                  echo "No CRITICAL vulnerabilities."
+                fi
+                '''
             }
         }
     }
 
-    // Hành động sau khi Pipeline hoàn tất
     post {
         always {
-            echo "CI Pipeline Finished"
+            echo "Jenkins DevSecOps Pipeline Finished"
         }
-        failure {
-            echo "Pipeline failed! Please check the console output."
-        }
+
         success {
-            echo "Pipeline succeeded! Ready for Deployment."
+            echo "Build SUCCESS"
+        }
+
+        failure {
+            echo "Build FAILED due to SECURITY"
         }
     }
 }
