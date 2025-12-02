@@ -104,11 +104,12 @@ pipeline {
         stage("Generate Security Report") {
             steps {
                 bat '''
-                bash generate-security-report.sh
+                docker run --rm -v "%cd%:/workdir" ^
+                  ubuntu:22.04 bash -c ^
+                  "cd /workdir && chmod +x generate-security-report.sh && ./generate-security-report.sh"
                 '''
             }
         }
-
         // 9. ARCHIVE ARTIFACT
         stage("Publish Security Artifacts") {
             steps {
