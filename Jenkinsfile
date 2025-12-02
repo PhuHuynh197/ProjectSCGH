@@ -4,6 +4,7 @@ pipeline {
     environment {
         IMAGE_NAME = "projectscgh-devsecops"
         IMAGE_TAG  = "latest"
+        DOCKER_HOST = "tcp://host.docker.internal:2375"
     }
 
     options {
@@ -24,7 +25,7 @@ pipeline {
         stage("Hadolint") {
             steps {
                 bat '''
-                docker run --rm -i hadolint/hadolint < Dockerfile > security/hadolint.txt || exit /b 0
+                docker -H %DOCKER_HOST% run --rm -i hadolint/hadolint < Dockerfile > security/hadolint.txt || exit /b 0
                 '''
             }
         }
@@ -32,7 +33,7 @@ pipeline {
         stage("Build Image") {
             steps {
                 bat '''
-                docker build -t %IMAGE_NAME%:%IMAGE_TAG% .
+                docker -H %DOCKER_HOST% build -t %IMAGE_NAME%:%IMAGE_TAG% .
                 '''
             }
         }
@@ -40,7 +41,7 @@ pipeline {
         stage("Gitleaks") {
             steps {
                 bat '''
-                docker run --rm -v "%cd%:/repo" zricethezav/gitleaks:latest detect ^
+                docker -H %DOCKER_HOST% run --rm -v "%cd%:/repo" zricethezav/gitleaks:latest detect ^
                   --source="/repo" ^
                   --report-format json ^
                   --report-path="/repo/security/gitleaks.json" ^
@@ -52,7 +53,7 @@ pipeline {
         stage("Trivy Config") {
             steps {
                 bat '''
-                docker run --rm -v "%cd%:/workdir" aquasec/trivy:latest config /workdir ^
+                docker -H %DOCKER_HOST% run --rm -v "%cd%:/workdir" aquasec/trivy:latest config /workdir ^
                   --format json ^
                   --output /workdir/security/trivy-config.json || exit /b 0
                 '''
@@ -62,7 +63,10 @@ pipeline {
         stage("Trivy Image") {
             steps {
                 bat '''
-                docker run --rm -v "%cd%:/workdir" aquasec/trivy:latest image %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker -H %DOCKER_HOST% run --rm ^
+                  -e DOCKER_HOST=%DOCKER_HOST% ^
+                  -v "%cd%:/workdir" ^
+                  aquasec/trivy:latest image %IMAGE_NAME%:%IMAGE_TAG% ^
                   --severity HIGH,CRITICAL ^
                   --format json ^
                   --output /workdir/security/trivy-image.json || exit /b 0
@@ -73,7 +77,9 @@ pipeline {
         stage("Grype") {
             steps {
                 bat '''
-                docker run --rm anchore/grype:latest %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker -H %DOCKER_HOST% run --rm ^
+                  -e DOCKER_HOST=%DOCKER_HOST% ^
+                  anchore/grype:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   -o json > security/grype.json || exit /b 0
                 '''
             }
@@ -82,7 +88,9 @@ pipeline {
         stage("Dockle") {
             steps {
                 bat '''
-                docker run --rm goodwithtech/dockle:latest %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker -H %DOCKER_HOST% run --rm ^
+                  -e DOCKER_HOST=%DOCKER_HOST% ^
+                  goodwithtech/dockle:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   --format json > security/dockle.json || exit /b 0
                 '''
             }
@@ -100,8 +108,8 @@ pipeline {
                 set found=0
 
                 if exist security\\trivy-image.json findstr /I "CRITICAL" security\\trivy-image.json > nul && set found=1
-                if exist security\\grype.json findstr /I "CRITICAL" security\\grype.json > nul && set found=1
-                if exist security\\dockle.json findstr /I "CRITICAL" security\\dockle.json > nul && set found=1
+                if exist security\\grype.json       findstr /I "CRITICAL" security\\grype.json > nul && set found=1
+                if exist security\\dockle.json      findstr /I "CRITICAL" security\\dockle.json > nul && set found=1
 
                 if %found%==1 (
                     echo CRITICAL vulnerabilities found!
