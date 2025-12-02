@@ -55,6 +55,58 @@ pipeline {
         }
 
         // 4. TRIVY - CONFIG
+        stage("Trivy - Config Scan") {
+            steps {
+                bat '''
+                docker run --rm -v "%cd%:/workdir" aquasec/trivy:latest config /workdir ^
+                  --format json ^
+                  --output /workdir/security/trivy-config.json || exit 0
+                '''
+            }
+        }
+
+        // 5. TRIVY - IMAGE
+        stage("Trivy - Image Scan") {
+            steps {
+                bat '''
+                docker run --rm -v "//var/run/docker.sock:/var/run/docker.sock" ^
+                  aquasec/trivy:latest image %IMAGE_NAME%:%IMAGE_TAG% ^
+                  --severity HIGH,CRITICAL ^
+                  --format json ^
+                  --output /workdir/security/trivy-image.json || exit 0
+                '''
+            }
+        }
+
+        // 6. GRYPE
+        stage("Grype - Image Scan") {
+            steps {
+                bat '''
+                docker run --rm -v "//var/run/docker.sock:/var/run/docker.sock" ^
+                  anchore/grype:latest %IMAGE_NAME%:%IMAGE_TAG% ^
+                  -o json > security/grype.json || exit 0
+                '''
+            }
+        }
+
+        // 7. DOCKLE
+        stage("Dockle - Best Practice") {
+            steps {
+                bat '''
+                docker run --rm -v "//var/run/docker.sock:/var/run/docker.sock" ^
+                  goodwithtech/dockle:latest %IMAGE_NAME%:%IMAGE_TAG% ^
+                  --format json > security/dockle.json || exit 0
+                '''
+            }
+        }
+        // 9. ARCHIVE ARTIFACT
+        stage("Publish Security Artifacts") {
+            steps {
+                archiveArtifacts artifacts: "security/**", fingerprint: true
+            }
+        }
+
+        // 10. FAIL IF CRITICAL
        9. FAIL IF CRITICAL
         stage("Fail On Critical Vulns") {
             steps {
