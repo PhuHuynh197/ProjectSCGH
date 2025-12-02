@@ -4,7 +4,6 @@ pipeline {
     environment {
         IMAGE_NAME = "projectscgh-devsecops"
         IMAGE_TAG  = "latest"
-        REPORT_DIR = "security"
     }
 
     options {
@@ -14,38 +13,34 @@ pipeline {
 
     stages {
 
-        // 0. CHECKOUT
-        stage("Checkout Source") {
+        stage("Checkout") {
             steps {
                 cleanWs()
                 checkout scm
-                bat 'if not exist security mkdir security'
+                bat "if not exist security mkdir security"
             }
         }
 
-        // 1. HADOLINT
-        stage("Hadolint - Dockerfile Lint") {
+        stage("Hadolint") {
             steps {
                 bat '''
-                docker -H tcp://localhost:2375 run --rm -i hadolint/hadolint < Dockerfile > security/hadolint.txt || exit /b 0
+                docker run --rm -i hadolint/hadolint < Dockerfile > security/hadolint.txt || exit /b 0
                 '''
             }
         }
 
-        // 2. BUILD IMAGE
-        stage("Build Docker Image") {
+        stage("Build Image") {
             steps {
                 bat '''
-                docker -H tcp://localhost:2375 build -t %IMAGE_NAME%:%IMAGE_TAG% .
+                docker build -t %IMAGE_NAME%:%IMAGE_TAG% .
                 '''
             }
         }
 
-        // 3. GITLEAKS
-        stage("Gitleaks - Secret Scan") {
+        stage("Gitleaks") {
             steps {
                 bat '''
-                docker -H tcp://localhost:2375 run --rm -v "%cd%:/repo" zricethezav/gitleaks:latest detect ^
+                docker run --rm -v "%cd%:/repo" zricethezav/gitleaks:latest detect ^
                   --source="/repo" ^
                   --report-format json ^
                   --report-path="/repo/security/gitleaks.json" ^
@@ -54,24 +49,20 @@ pipeline {
             }
         }
 
-        // 4. TRIVY - CONFIG
-        stage("Trivy - Config Scan") {
+        stage("Trivy Config") {
             steps {
                 bat '''
-                docker -H tcp://localhost:2375 run --rm -v "%cd%:/workdir" aquasec/trivy:latest config /workdir ^
+                docker run --rm -v "%cd%:/workdir" aquasec/trivy:latest config /workdir ^
                   --format json ^
                   --output /workdir/security/trivy-config.json || exit /b 0
                 '''
             }
         }
 
-        // 5. TRIVY - IMAGE
-        stage("Trivy - Image Scan") {
+        stage("Trivy Image") {
             steps {
                 bat '''
-                docker -H tcp://localhost:2375 run --rm ^
-                  -v "%cd%:/workdir" ^
-                  aquasec/trivy:latest image %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker run --rm -v "%cd%:/workdir" aquasec/trivy:latest image %IMAGE_NAME%:%IMAGE_TAG% ^
                   --severity HIGH,CRITICAL ^
                   --format json ^
                   --output /workdir/security/trivy-image.json || exit /b 0
@@ -79,44 +70,38 @@ pipeline {
             }
         }
 
-        // 6. GRYPE
-        stage("Grype - Image Scan") {
+        stage("Grype") {
             steps {
                 bat '''
-                docker -H tcp://localhost:2375 run --rm ^
-                  anchore/grype:latest %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker run --rm anchore/grype:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   -o json > security/grype.json || exit /b 0
                 '''
             }
         }
 
-        // 7. DOCKLE
-        stage("Dockle - Best Practice") {
+        stage("Dockle") {
             steps {
                 bat '''
-                docker -H tcp://localhost:2375 run --rm ^
-                  goodwithtech/dockle:latest %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker run --rm goodwithtech/dockle:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   --format json > security/dockle.json || exit /b 0
                 '''
             }
         }
 
-        // 8. ARCHIVE ARTIFACT
-        stage("Publish Security Artifacts") {
+        stage("Publish Artifacts") {
             steps {
                 archiveArtifacts artifacts: "security/**", fingerprint: true
             }
         }
 
-        // 9. FAIL IF CRITICAL
-        stage("Fail On Critical Vulns") {
+        stage("Fail On Critical") {
             steps {
                 bat '''
                 set found=0
 
                 if exist security\\trivy-image.json findstr /I "CRITICAL" security\\trivy-image.json > nul && set found=1
-                if exist security\\grype.json       findstr /I "CRITICAL" security\\grype.json > nul && set found=1
-                if exist security\\dockle.json      findstr /I "CRITICAL" security\\dockle.json > nul && set found=1
+                if exist security\\grype.json findstr /I "CRITICAL" security\\grype.json > nul && set found=1
+                if exist security\\dockle.json findstr /I "CRITICAL" security\\dockle.json > nul && set found=1
 
                 if %found%==1 (
                     echo CRITICAL vulnerabilities found!
