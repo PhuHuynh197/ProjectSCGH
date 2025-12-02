@@ -5,6 +5,7 @@ pipeline {
         IMAGE_NAME = "projectscgh-devsecops"
         IMAGE_TAG  = "latest"
         REPORT_DIR = "security"
+        DOCKER_HOST = "tcp://localhost:2375"
     }
 
     options {
@@ -36,7 +37,7 @@ pipeline {
         stage("Build Docker Image") {
             steps {
                 bat '''
-                docker build -t %IMAGE_NAME%:%IMAGE_TAG% .
+                docker -H %DOCKER_HOST% build -t %IMAGE_NAME%:%IMAGE_TAG% .
                 '''
             }
         }
@@ -70,9 +71,8 @@ pipeline {
             steps {
                 bat '''
                 if not exist security mkdir security
-        
-                docker run --rm ^
-                  -e DOCKER_HOST=%DOCKER_HOST% ^
+
+                docker -H %DOCKER_HOST% run --rm ^
                   -v "%cd%:/workdir" ^
                   aquasec/trivy:latest image %IMAGE_NAME%:%IMAGE_TAG% ^
                   --severity HIGH,CRITICAL ^
@@ -86,8 +86,7 @@ pipeline {
         stage("Grype - Image Scan") {
             steps {
                 bat '''
-                docker run --rm ^
-                  -e DOCKER_HOST=%DOCKER_HOST% ^
+                docker -H %DOCKER_HOST% run --rm ^
                   anchore/grype:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   -o json > security/grype.json || exit 0
                 '''
@@ -98,8 +97,7 @@ pipeline {
         stage("Dockle - Best Practice") {
             steps {
                 bat '''
-                docker run --rm ^
-                  -e DOCKER_HOST=%DOCKER_HOST% ^
+                docker -H %DOCKER_HOST% run --rm ^
                   goodwithtech/dockle:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   --format json > security/dockle.json || exit 0
                 '''
@@ -118,11 +116,11 @@ pipeline {
             steps {
                 bat '''
                 set found=0
-        
+
                 if exist security\\trivy-image.json findstr /I "CRITICAL" security\\trivy-image.json > nul && set found=1
                 if exist security\\grype.json       findstr /I "CRITICAL" security\\grype.json > nul && set found=1
                 if exist security\\dockle.json      findstr /I "CRITICAL" security\\dockle.json > nul && set found=1
-        
+
                 if %found%==1 (
                     echo CRITICAL vulnerabilities found!
                     exit /b 1
@@ -133,6 +131,7 @@ pipeline {
             }
         }
 
+    } 
 
     post {
         always {
