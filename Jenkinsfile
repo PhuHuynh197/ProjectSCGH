@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "projectscgh-devsecops"
+        IMAGE_NAME = "phuhuynh197/projectscgh-devsecops"
         IMAGE_TAG  = "latest"
     }
 
@@ -51,6 +51,14 @@ pipeline {
             }
         }
 
+        stage("Push Image To DockerHub") {
+            steps {
+                bat '''
+                docker push %IMAGE_NAME%:%IMAGE_TAG%
+                '''
+            }
+        }
+
         stage("Gitleaks") {
             steps {
                 bat '''
@@ -73,40 +81,30 @@ pipeline {
             }
         }
 
-        stage("Trivy Image") {
+        stage("Trivy Image (Remote Scan)") {
             steps {
                 bat '''
-                docker run --rm ^
-                  -e DOCKER_HOST=npipe:////./pipe/docker_engine ^
-                  -v //./pipe/docker_engine://./pipe/docker_engine ^
-                  -v "%cd%:/workdir" ^
-                  aquasec/trivy:latest image %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker run --rm aquasec/trivy:latest image %IMAGE_NAME%:%IMAGE_TAG% ^
                   --severity HIGH,CRITICAL ^
                   --format json ^
                   --output /workdir/security/trivy-image.json || exit /b 0
                 '''
             }
         }
-        
-        stage("Grype") {
+
+        stage("Grype (Remote)") {
             steps {
                 bat '''
-                docker run --rm ^
-                  -e DOCKER_HOST=npipe:////./pipe/docker_engine ^
-                  -v //./pipe/docker_engine://./pipe/docker_engine ^
-                  anchore/grype:latest %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker run --rm anchore/grype:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   -o json > security/grype.json || exit /b 0
                 '''
             }
         }
-        
-        stage("Dockle") {
+
+        stage("Dockle (Remote)") {
             steps {
                 bat '''
-                docker run --rm ^
-                  -e DOCKER_HOST=npipe:////./pipe/docker_engine ^
-                  -v //./pipe/docker_engine://./pipe/docker_engine ^
-                  goodwithtech/dockle:latest %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker run --rm goodwithtech/dockle:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   --format json > security/dockle.json || exit /b 0
                 '''
             }
