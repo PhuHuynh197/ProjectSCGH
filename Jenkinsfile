@@ -109,7 +109,7 @@ pipeline {
             steps {
                 bat '''
                 docker run --rm goodwithtech/dockle:latest ^
-                  registry:%IMAGE_NAME%:%IMAGE_TAG% ^
+                  registry://docker.io/%IMAGE_NAME%:%IMAGE_TAG% ^
                   --format json > security/dockle.json || exit /b 0
                 '''
             }
