@@ -81,7 +81,7 @@ pipeline {
             }
         }
 
-        stage("Trivy Image (Remote Scan)") {
+        stage("Trivy Image") {
             steps {
                 bat '''
                 docker run --rm ^
@@ -95,7 +95,7 @@ pipeline {
             }
         }
         
-        stage("Grype (Remote)") {
+        stage("Grype") {
             steps {
                 bat '''
                 docker run --rm anchore/grype:latest ^
@@ -105,7 +105,7 @@ pipeline {
             }
         }
         
-        stage("Dockle (Remote)") {
+        stage("Dockle") {
             steps {
                 bat '''
                 docker run --rm goodwithtech/dockle:latest ^
