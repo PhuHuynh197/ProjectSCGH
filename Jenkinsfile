@@ -77,6 +77,7 @@ pipeline {
             steps {
                 bat '''
                 docker run --rm ^
+                  -e DOCKER_HOST=npipe:////./pipe/docker_engine ^
                   -v //./pipe/docker_engine://./pipe/docker_engine ^
                   -v "%cd%:/workdir" ^
                   aquasec/trivy:latest image %IMAGE_NAME%:%IMAGE_TAG% ^
@@ -91,6 +92,7 @@ pipeline {
             steps {
                 bat '''
                 docker run --rm ^
+                  -e DOCKER_HOST=npipe:////./pipe/docker_engine ^
                   -v //./pipe/docker_engine://./pipe/docker_engine ^
                   anchore/grype:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   -o json > security/grype.json || exit /b 0
@@ -98,18 +100,17 @@ pipeline {
             }
         }
         
-        
         stage("Dockle") {
             steps {
                 bat '''
                 docker run --rm ^
+                  -e DOCKER_HOST=npipe:////./pipe/docker_engine ^
                   -v //./pipe/docker_engine://./pipe/docker_engine ^
                   goodwithtech/dockle:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   --format json > security/dockle.json || exit /b 0
                 '''
             }
         }
-
 
         stage("Publish Artifacts") {
             steps {
