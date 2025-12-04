@@ -109,8 +109,8 @@ pipeline {
             steps {
                 bat '''
                 docker run --rm goodwithtech/dockle:latest ^
-                  registry://docker.io/%IMAGE_NAME%:%IMAGE_TAG% ^
-                  --format json > security/dockle.json || exit /b 0
+                  --format json ^
+                  %IMAGE_NAME%:%IMAGE_TAG% > security/dockle.json || exit /b 0
                 '''
             }
         }
