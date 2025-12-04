@@ -84,27 +84,32 @@ pipeline {
         stage("Trivy Image (Remote Scan)") {
             steps {
                 bat '''
-                docker run --rm aquasec/trivy:latest image %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker run --rm ^
+                  -v "%cd%:/workdir" ^
+                  aquasec/trivy:latest image %IMAGE_NAME%:%IMAGE_TAG% ^
+                  --scanners vuln ^
                   --severity HIGH,CRITICAL ^
                   --format json ^
                   --output /workdir/security/trivy-image.json || exit /b 0
                 '''
             }
         }
-
+        
         stage("Grype (Remote)") {
             steps {
                 bat '''
-                docker run --rm anchore/grype:latest %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker run --rm anchore/grype:latest ^
+                  registry:%IMAGE_NAME%:%IMAGE_TAG% ^
                   -o json > security/grype.json || exit /b 0
                 '''
             }
         }
-
+        
         stage("Dockle (Remote)") {
             steps {
                 bat '''
-                docker run --rm goodwithtech/dockle:latest %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker run --rm goodwithtech/dockle:latest ^
+                  --input %IMAGE_NAME%:%IMAGE_TAG% ^
                   --format json > security/dockle.json || exit /b 0
                 '''
             }
