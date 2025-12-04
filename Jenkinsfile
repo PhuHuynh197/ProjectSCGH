@@ -23,9 +23,13 @@ pipeline {
 
         stage("Docker Login") {
             steps {
-                withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKER_PASS')]) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
                     bat '''
-                    echo %DOCKER_PASS% | docker login -u phuhuynh197 --password-stdin
+                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
                     '''
                 }
             }
@@ -72,9 +76,7 @@ pipeline {
         stage("Trivy Image") {
             steps {
                 bat '''
-                docker run --rm ^
-                  -v //var/run/docker.sock:/var/run/docker.sock ^
-                  -v "%cd%:/workdir" ^
+                docker run --rm -v "%cd%:/workdir" ^
                   aquasec/trivy:latest image %IMAGE_NAME%:%IMAGE_TAG% ^
                   --severity HIGH,CRITICAL ^
                   --format json ^
@@ -86,9 +88,7 @@ pipeline {
         stage("Grype") {
             steps {
                 bat '''
-                docker run --rm ^
-                  -v //var/run/docker.sock:/var/run/docker.sock ^
-                  anchore/grype:latest %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker run --rm anchore/grype:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   -o json > security/grype.json || exit /b 0
                 '''
             }
@@ -97,9 +97,7 @@ pipeline {
         stage("Dockle") {
             steps {
                 bat '''
-                docker run --rm ^
-                  -v //var/run/docker.sock:/var/run/docker.sock ^
-                  goodwithtech/dockle:latest %IMAGE_NAME%:%IMAGE_TAG% ^
+                docker run --rm goodwithtech/dockle:latest %IMAGE_NAME%:%IMAGE_TAG% ^
                   --format json > security/dockle.json || exit /b 0
                 '''
             }
