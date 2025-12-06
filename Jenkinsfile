@@ -131,7 +131,6 @@ pipeline {
                       --format HTML ^
                       --out /src/security ^
                       --nvdApiKey %NVD_API_KEY% ^
-                      --enableExperimental ^ 
                       --failOnCVSS 7.0
                     '''
                 }
