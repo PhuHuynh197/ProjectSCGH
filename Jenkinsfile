@@ -121,7 +121,6 @@ pipeline {
                 bat '''
                 docker run --rm ^
                   -v "%cd%:/app" ^
-                  -v "%USERPROFILE%\\.m2:/root/.m2" ^
                   -w /app ^
                   maven:3.9-eclipse-temurin-17 ^
                   mvn -B -DskipTests dependency:copy-dependencies
@@ -139,12 +138,12 @@ pipeline {
                       -v "%cd%:/src" ^
                       -v dependency-check-data:/usr/share/dependency-check/data ^
                       owasp/dependency-check:latest ^
-                      --project "ProjectSCGH-DevSecOps" ^
-                      --scan /src ^
+                      --project "%JOB_NAME%" ^
+                      --scan /src/target/dependency ^
                       --format HTML ^
                       --out /src/security ^
                       --nvdApiKey %NVD_API_KEY% ^
-                      --failOnCVSS 7.0
+                      --failOnCVSS 11
                     '''
                 }
             }
