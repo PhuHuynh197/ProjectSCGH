@@ -116,6 +116,19 @@ pipeline {
             }
         }
 
+        stage("Resolve Maven Dependencies") {
+            steps {
+                bat '''
+                docker run --rm ^
+                  -v "%cd%:/app" ^
+                  -v "%USERPROFILE%\\.m2:/root/.m2" ^
+                  -w /app ^
+                  maven:3.9-eclipse-temurin-17 ^
+                  mvn -B -DskipTests dependency:copy-dependencies
+                '''
+            }
+        }
+        
         stage("Dependency-Check") {
             steps {
                 withCredentials([
@@ -165,7 +178,7 @@ pipeline {
                 if exist security\\grype.json       findstr /I "CRITICAL" security\\grype.json > nul && set found=1
                 if exist security\\dockle.json      findstr /I "CRITICAL" security\\dockle.json > nul && set found=1
 
-                if %found%==1 (
+                if %found%==1 (    
                     echo CRITICAL vulnerabilities found!
                     exit /b 1
                 ) else (
