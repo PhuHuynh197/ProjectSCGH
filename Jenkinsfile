@@ -182,60 +182,45 @@ pipeline {
                 bat '''
                 @echo off
                 setlocal EnableDelayedExpansion
-        
                 set found=0
         
-                REM ===== Trivy Image (CRITICAL) =====
+                echo === SECURITY GATE CHECK ===
+        
                 if exist security\\trivy-image.json (
-                    findstr /I "\"Severity\":\"CRITICAL\"" security\\trivy-image.json >nul && (
-                        echo [FAIL] CRITICAL vulnerability found by Trivy Image
+                    findstr /I "\"CRITICAL\"" security\\trivy-image.json >nul && (
+                        echo [FAIL] Trivy Image: CRITICAL
                         set found=1
                     )
                 )
         
-                REM ===== Grype (Critical) =====
                 if exist security\\grype.json (
-                    findstr /I "\"severity\":\"Critical\"" security\\grype.json >nul && (
-                        echo [FAIL] Critical vulnerability found by Grype
+                    findstr /I "\"Critical\"" security\\grype.json >nul && (
+                        echo [FAIL] Grype: Critical
                         set found=1
                     )
                 )
         
-                REM ===== Dockle (FATAL) =====
                 if exist security\\dockle.json (
-                    findstr /I "\"level\":\"FATAL\"" security\\dockle.json >nul && (
-                        echo [FAIL] FATAL issue found by Dockle
+                    findstr /I "\"FATAL\"" security\\dockle.json >nul && (
+                        echo [FAIL] Dockle: FATAL
                         set found=1
                     )
                 )
         
-                REM ===== Dependency-Check (CVSS > threshold) =====
                 if exist security\\dependency-check-report.html (
-                    findstr /I "Vulnerabilities Found: 0" security\\dependency-check-report.html >nul
-                    if errorlevel 1 (
-                        echo [FAIL] Vulnerabilities detected by Dependency-Check
+                    findstr /I "Vulnerabilities Found: 0" security\\dependency-check-report.html >nul || (
+                        echo [FAIL] Dependency-Check: Vulnerabilities found
                         set found=1
-                    ) else (
-                        echo [PASS] Dependency-Check: No vulnerabilities found
                     )
                 )
         
-                REM ===== Final Decision =====
                 if "!found!"=="1" (
-                    echo ============================================
-                    echo SECURITY GATE RESULT: FAIL
-                    echo Build blocked due to CRITICAL / FATAL issues
-                    echo ============================================
+                    echo === SECURITY GATE: FAIL ===
                     exit /b 1
                 ) else (
-                    echo ============================================
-                    echo SECURITY GATE RESULT: PASS
-                    echo No CRITICAL / FATAL issues detected
-                    echo ============================================
+                    echo === SECURITY GATE: PASS ===
                     exit /b 0
                 )
-        
-                endlocal
                 '''
             }
         }
