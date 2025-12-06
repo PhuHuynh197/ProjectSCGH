@@ -1,16 +1,13 @@
 {
-  "name": "node-app-vulnerable",
+  "name": "node-app",
   "version": "1.0.0",
-  "description": "Intentionally vulnerable Node.js app for security scanning demo",
+  "description": "A simple Node.js application",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "echo \"no tests\" && exit 0"
+    "test": "echo \"Error: no test specified\" && exit 0"
   },
   "dependencies": {
-    "express": "4.16.0",
-    "lodash": "4.17.11",
-    "jsonwebtoken": "8.5.0",
-    "mongoose": "5.7.0"
+    "express": "^4.17.1"
   }
 }
