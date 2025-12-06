@@ -66,7 +66,8 @@ pipeline {
                   --source="/repo" ^
                   --report-format json ^
                   --report-path="/repo/security/gitleaks.json" ^
-                  --no-banner || exit /b 0
+                  --exit-code 0 ^
+                  --no-banner
                 '''
             }
         }
@@ -125,22 +126,34 @@ pipeline {
             steps {
                 bat '''
                 set found=0
-
-                if exist security\\trivy-image.json findstr /I "CRITICAL" security\\trivy-image.json > nul && set found=1
-                if exist security\\grype.json       findstr /I "CRITICAL" security\\grype.json > nul && set found=1
-                if exist security\\dockle.json      findstr /I "CRITICAL" security\\dockle.json > nul && set found=1
-
-                if %found%==1 (
-                    echo CRITICAL vulnerabilities found!
+        
+                REM === Trivy ===
+                if exist security\\trivy-image.json (
+                    findstr /I "\"Severity\":\"CRITICAL\"" security\\trivy-image.json > nul && set found=1
+                )
+        
+                REM === Grype ===
+                if exist security\\grype.json (
+                    findstr /I "\"severity\":\"Critical\"" security\\grype.json > nul && set found=1
+                )
+        
+                REM === Dockle ===
+                if exist security\\dockle.json (
+                    findstr /I "\"level\":\"FATAL\"" security\\dockle.json > nul && set found=1
+                )
+        
+                if "%found%"=="1" (
+                    echo CRITICAL / FATAL security issues found!
                     exit /b 1
                 ) else (
-                    echo No CRITICAL vulnerabilities.
+                    echo No CRITICAL or FATAL vulnerabilities.
+                    exit /b 0
                 )
                 '''
             }
         }
     }
-
+    
     post {
         always {
             echo "Jenkins DevSecOps Pipeline Finished"
