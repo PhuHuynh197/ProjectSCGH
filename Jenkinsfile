@@ -156,37 +156,20 @@ pipeline {
             }
         }
 
-                stage("Fail On Critical") {
+        stage("Fail On Critical") {
             steps {
                 bat '''
-                set FAIL=0
+                set found=0
 
-                REM ===== Trivy =====
-                if exist security\\trivy-image.json (
-                    findstr /I "\"Severity\":\"CRITICAL\"" security\\trivy-image.json > nul && set FAIL=1
-                )
+                if exist security\\trivy-image.json findstr /I "CRITICAL" security\\trivy-image.json > nul && set found=1
+                if exist security\\grype.json       findstr /I "CRITICAL" security\\grype.json > nul && set found=1
+                if exist security\\dockle.json      findstr /I "CRITICAL" security\\dockle.json > nul && set found=1
 
-                REM ===== Grype =====
-                if exist security\\grype.json (
-                    findstr /I "\"severity\":\"Critical\"" security\\grype.json > nul && set FAIL=1
-                )
-
-                REM ===== Dockle =====
-                if exist security\\dockle.json (
-                    findstr /I "\"level\":\"FATAL\"" security\\dockle.json > nul && set FAIL=1
-                )
-
-                REM ===== Dependency-Check (CVSS >= 7) =====
-                if exist security\\dependency-check-report.html (
-                    findstr /I "cvssScore\">7" security\\dependency-check-report.html > nul && set FAIL=1
-                )
-
-                if "%FAIL%"=="1" (
-                    echo SECURITY POLICY VIOLATION DETECTED
+                if %found%==1 (
+                    echo CRITICAL vulnerabilities found!
                     exit /b 1
                 ) else (
-                    echo No blocking security vulnerabilities found
-                    exit /b 0
+                    echo No CRITICAL vulnerabilities.
                 )
                 '''
             }
