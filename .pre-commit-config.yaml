@@ -3,8 +3,22 @@ repos:
     rev: v8.18.0
     hooks:
       - id: gitleaks
-        args: ["detect", "--no-git", "--redact"]
+        name: Gitleaks Secret Scan
+        args:
+          [
+            "detect",
+            "--no-git",
+            "--redact",
+            "--verbose"
+          ]
+
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.4.0
     hooks:
       - id: detect-secrets-hook
+        name: Detect Secrets Scan
+        args:
+          [
+            "--baseline",
+            ".secrets.baseline"
+          ]
